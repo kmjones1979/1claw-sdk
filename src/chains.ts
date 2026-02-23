@@ -33,10 +33,7 @@ export class ChainsResource {
 
     /** List all chains including disabled ones (admin). */
     async adminList(): Promise<OneclawResponse<ChainListResponse>> {
-        return this.http.request<ChainListResponse>(
-            "GET",
-            "/v1/admin/chains",
-        );
+        return this.http.request<ChainListResponse>("GET", "/v1/admin/chains");
     }
 
     /** Add a new chain to the registry (admin). */
@@ -62,9 +59,6 @@ export class ChainsResource {
 
     /** Remove a chain from the registry (admin). */
     async delete(chainId: string): Promise<OneclawResponse<void>> {
-        return this.http.request<void>(
-            "DELETE",
-            `/v1/admin/chains/${chainId}`,
-        );
+        return this.http.request<void>("DELETE", `/v1/admin/chains/${chainId}`);
     }
 }

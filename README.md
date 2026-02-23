@@ -64,21 +64,21 @@ await client.auth.google({ id_token: "..." });
 
 ## API Resources
 
-| Resource           | Methods                                                                                                    |
-| ------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `client.vault`     | `create`, `get`, `list`, `delete`                                                                          |
-| `client.secrets`   | `set`, `get`, `delete`, `list`, `rotate`                                                                   |
-| `client.access`    | `grantHuman`, `grantAgent`, `update`, `revoke`, `listGrants`                                               |
+| Resource           | Methods                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `client.vault`     | `create`, `get`, `list`, `delete`                                                                                   |
+| `client.secrets`   | `set`, `get`, `delete`, `list`, `rotate`                                                                            |
+| `client.access`    | `grantHuman`, `grantAgent`, `update`, `revoke`, `listGrants`                                                        |
 | `client.agents`    | `create`, `get`, `list`, `update`, `delete`, `rotateKey`, `submitTransaction`, `getTransaction`, `listTransactions` |
-| `client.chains`    | `list`, `get`, `adminList`, `create`, `update`, `delete`                                                   |
-| `client.sharing`   | `create`, `access`, `listOutbound`, `listInbound`, `accept`, `decline`, `revoke`                           |
-| `client.approvals` | `request`, `list`, `approve`, `deny`, `check`, `subscribe`                                                 |
-| `client.billing`   | `usage`, `history`                                                                                         |
-| `client.audit`     | `query`                                                                                                    |
-| `client.org`       | `listMembers`, `updateMemberRole`, `removeMember`                                                          |
-| `client.auth`      | `login`, `agentToken`, `apiKeyToken`, `google`, `changePassword`, `logout`                                 |
-| `client.apiKeys`   | `create`, `list`, `revoke`                                                                                 |
-| `client.x402`      | `getPaymentRequirement`, `pay`, `verifyReceipt`, `withPayment`                                             |
+| `client.chains`    | `list`, `get`, `adminList`, `create`, `update`, `delete`                                                            |
+| `client.sharing`   | `create`, `access`, `listOutbound`, `listInbound`, `accept`, `decline`, `revoke`                                    |
+| `client.approvals` | `request`, `list`, `approve`, `deny`, `check`, `subscribe`                                                          |
+| `client.billing`   | `usage`, `history`                                                                                                  |
+| `client.audit`     | `query`                                                                                                             |
+| `client.org`       | `listMembers`, `updateMemberRole`, `removeMember`                                                                   |
+| `client.auth`      | `login`, `agentToken`, `apiKeyToken`, `google`, `changePassword`, `logout`                                          |
+| `client.apiKeys`   | `create`, `list`, `revoke`                                                                                          |
+| `client.x402`      | `getPaymentRequirement`, `pay`, `verifyReceipt`, `withPayment`                                                      |
 
 ## Response Envelope
 
@@ -150,14 +150,14 @@ Once `crypto_proxy_enabled` is true and the agent has a signing key stored in an
 ```typescript
 const txRes = await client.agents.submitTransaction(agentId, {
     to: "0x000000000000000000000000000000000000dEaD",
-    value: "0.01",    // ETH
+    value: "0.01", // ETH
     chain: "base",
     // Optional: data, signing_key_path, nonce, gas_price, gas_limit
 });
 
-console.log(txRes.data?.status);     // "signed"
-console.log(txRes.data?.tx_hash);    // "0x..."
-console.log(txRes.data?.signed_tx);  // signed raw transaction hex
+console.log(txRes.data?.status); // "signed"
+console.log(txRes.data?.tx_hash); // "0x..."
+console.log(txRes.data?.signed_tx); // signed raw transaction hex
 ```
 
 The backend fetches the signing key from the vault, signs the EIP-155 transaction, and returns the signed transaction hex. The signing key is decrypted in-memory, used, and immediately zeroized — it never leaves the server.

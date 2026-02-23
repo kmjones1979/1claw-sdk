@@ -88,18 +88,12 @@ export class SharingResource {
 
     /** Accept an inbound share. */
     async accept(shareId: string): Promise<OneclawResponse<void>> {
-        return this.http.request<void>(
-            "POST",
-            `/v1/shares/${shareId}/accept`,
-        );
+        return this.http.request<void>("POST", `/v1/shares/${shareId}/accept`);
     }
 
     /** Decline an inbound share. */
     async decline(shareId: string): Promise<OneclawResponse<void>> {
-        return this.http.request<void>(
-            "POST",
-            `/v1/shares/${shareId}/decline`,
-        );
+        return this.http.request<void>("POST", `/v1/shares/${shareId}/decline`);
     }
 
     /** Revoke an active share link. Only the creator can revoke. */
