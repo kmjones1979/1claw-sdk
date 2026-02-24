@@ -214,6 +214,14 @@ export interface CreateAgentRequest {
     expires_at?: string;
     /** Enable the crypto transaction proxy for this agent (default: false). */
     crypto_proxy_enabled?: boolean;
+    /** Allowlist of destination addresses this agent may send to. Empty = unrestricted. */
+    tx_to_allowlist?: string[];
+    /** Maximum value in ETH per single transaction (e.g. "1.5"). Null = unlimited. */
+    tx_max_value_eth?: string;
+    /** Maximum cumulative spend in ETH over a rolling 24-hour window. Null = unlimited. */
+    tx_daily_limit_eth?: string;
+    /** Chains this agent may transact on (e.g. ["base","sepolia"]). Empty = all enabled chains. */
+    tx_allowed_chains?: string[];
 }
 
 export interface UpdateAgentRequest {
@@ -223,6 +231,14 @@ export interface UpdateAgentRequest {
     expires_at?: string | null;
     /** Toggle the crypto transaction proxy for this agent. */
     crypto_proxy_enabled?: boolean;
+    /** Allowlist of destination addresses. Pass empty array to clear. */
+    tx_to_allowlist?: string[];
+    /** Max ETH per transaction. Pass null to remove limit. */
+    tx_max_value_eth?: string | null;
+    /** Max ETH per 24h rolling window. Pass null to remove limit. */
+    tx_daily_limit_eth?: string | null;
+    /** Allowed chains. Pass empty array to allow all. */
+    tx_allowed_chains?: string[];
 }
 
 export interface AgentResponse {
@@ -234,6 +250,14 @@ export interface AgentResponse {
     is_active: boolean;
     /** Whether this agent can submit transactions through the signing proxy. */
     crypto_proxy_enabled: boolean;
+    /** Destination address allowlist (empty = unrestricted). */
+    tx_to_allowlist?: string[];
+    /** Max ETH per single transaction. */
+    tx_max_value_eth?: string;
+    /** Max ETH spend per rolling 24h window. */
+    tx_daily_limit_eth?: string;
+    /** Chains this agent may transact on (empty = all). */
+    tx_allowed_chains?: string[];
     created_at: string;
     expires_at?: string;
     last_active_at?: string;
