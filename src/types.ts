@@ -312,12 +312,67 @@ export interface SubmitTransactionRequest {
     data?: string;
     /** Vault path to the signing key. Defaults to `keys/{chain}-signer`. */
     signing_key_path?: string;
-    /** Transaction nonce. Defaults to 0; callers should provide the correct nonce. */
+    /** Transaction nonce. Auto-resolved from RPC when omitted. */
     nonce?: number;
-    /** Gas price in wei. Defaults to 1 gwei. */
+    /** Gas price in wei (legacy). Defaults to 1 gwei. Ignored when EIP-1559 fields are set. */
     gas_price?: string;
     /** Gas limit. Defaults to 21 000. */
     gas_limit?: number;
+    /** EIP-1559 max fee per gas in wei. When set, uses Type 2 signing. */
+    max_fee_per_gas?: string;
+    /** EIP-1559 max priority fee per gas in wei. */
+    max_priority_fee_per_gas?: string;
+    /** When true, simulate via Tenderly before signing. If simulation reverts, returns 422. */
+    simulate_first?: boolean;
+}
+
+export interface SimulateTransactionRequest {
+    to: string;
+    value: string;
+    chain: string;
+    data?: string;
+    signing_key_path?: string;
+    gas_limit?: number;
+}
+
+export interface SimulateBundleRequest {
+    transactions: SimulateBundleItem[];
+}
+
+export interface SimulateBundleItem {
+    to: string;
+    value: string;
+    chain: string;
+    data?: string;
+    signing_key_path?: string;
+    gas_limit?: number;
+}
+
+export interface BalanceChange {
+    address: string;
+    token?: string;
+    token_symbol?: string;
+    before?: string;
+    after?: string;
+    change?: string;
+}
+
+export interface SimulationResponse {
+    simulation_id: string;
+    status: "success" | "reverted" | "error";
+    gas_used: number;
+    gas_estimate_usd?: string;
+    balance_changes: BalanceChange[];
+    error?: string;
+    error_code?: string;
+    error_human_readable?: string;
+    revert_reason?: string;
+    tenderly_dashboard_url?: string;
+    simulated_at: string;
+}
+
+export interface BundleSimulationResponse {
+    simulations: SimulationResponse[];
 }
 
 export interface TransactionResponse {
@@ -327,12 +382,16 @@ export interface TransactionResponse {
     chain_id: number;
     to: string;
     value_wei: string;
-    status: "pending" | "signed" | "failed";
+    status: "pending" | "signed" | "broadcast" | "failed" | "simulation_failed";
     signed_tx?: string;
     tx_hash?: string;
     error_message?: string;
     created_at: string;
     signed_at?: string;
+    simulation_id?: string;
+    simulation_status?: string;
+    max_fee_per_gas?: string;
+    max_priority_fee_per_gas?: string;
 }
 
 export interface TransactionListResponse {

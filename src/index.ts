@@ -74,6 +74,12 @@ export type {
     UpdateChainRequest,
     // Transactions (Crypto Proxy)
     SubmitTransactionRequest,
+    SimulateTransactionRequest,
+    SimulateBundleRequest,
+    SimulateBundleItem,
+    SimulationResponse,
+    BundleSimulationResponse,
+    BalanceChange,
     TransactionResponse,
     TransactionListResponse,
     // Sharing

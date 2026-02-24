@@ -7,6 +7,10 @@ import type {
     AgentListResponse,
     AgentKeyRotatedResponse,
     SubmitTransactionRequest,
+    SimulateTransactionRequest,
+    SimulateBundleRequest,
+    SimulationResponse,
+    BundleSimulationResponse,
     TransactionResponse,
     TransactionListResponse,
     OneclawResponse,
@@ -109,6 +113,37 @@ export class AgentsResource {
         return this.http.request<TransactionListResponse>(
             "GET",
             `/v1/agents/${agentId}/transactions`,
+        );
+    }
+
+    // ── Transaction Simulation ─────────────────────────────────────────
+
+    /**
+     * Simulate a transaction via Tenderly without signing or broadcasting.
+     * Returns balance changes, gas estimates, and success/revert status.
+     */
+    async simulateTransaction(
+        agentId: string,
+        tx: SimulateTransactionRequest,
+    ): Promise<OneclawResponse<SimulationResponse>> {
+        return this.http.request<SimulationResponse>(
+            "POST",
+            `/v1/agents/${agentId}/transactions/simulate`,
+            { body: tx },
+        );
+    }
+
+    /**
+     * Simulate a bundle of transactions sequentially (e.g. approve + swap).
+     */
+    async simulateBundle(
+        agentId: string,
+        bundle: SimulateBundleRequest,
+    ): Promise<OneclawResponse<BundleSimulationResponse>> {
+        return this.http.request<BundleSimulationResponse>(
+            "POST",
+            `/v1/agents/${agentId}/transactions/simulate-bundle`,
+            { body: bundle },
         );
     }
 }
