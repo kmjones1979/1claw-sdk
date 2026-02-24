@@ -26,14 +26,23 @@
         "prepublishOnly": "npm run clean && npm run build"
     },
     "keywords": [
+        "1claw",
         "secrets",
         "vault",
         "ai-agents",
         "x402",
         "hsm",
         "mcp",
-        "model-context-protocol"
+        "model-context-protocol",
+        "claude",
+        "cursor",
+        "typescript",
+        "api-keys",
+        "zero-trust"
     ],
+    "publishConfig": {
+        "access": "public"
+    },
     "license": "PolyForm-Noncommercial-1.0.0",
     "repository": {
         "type": "git",
