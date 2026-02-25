@@ -14,6 +14,13 @@ const VERSION_BYTE = 0x01;
 const IV_LENGTH = 12;
 const KEY_LENGTH = 32; // AES-256
 
+/** Extract a strict ArrayBuffer from a Uint8Array (satisfies WebCrypto BufferSource in TS 5.x strict). */
+function asArrayBuffer(data: Uint8Array): ArrayBuffer {
+    const buf = new ArrayBuffer(data.byteLength);
+    new Uint8Array(buf).set(data);
+    return buf;
+}
+
 /**
  * Generate a random 256-bit AES-GCM key.
  * Returns the raw key bytes as a Uint8Array (32 bytes).
@@ -29,7 +36,7 @@ export async function generateCmekKey(): Promise<Uint8Array> {
  * Returns a 64-character lowercase hex string.
  */
 export async function cmekFingerprint(key: Uint8Array): Promise<string> {
-    const hash = await crypto.subtle.digest("SHA-256", key);
+    const hash = await crypto.subtle.digest("SHA-256", asArrayBuffer(key));
     return Array.from(new Uint8Array(hash))
         .map((b) => b.toString(16).padStart(2, "0"))
         .join("");
@@ -45,7 +52,7 @@ export async function cmekEncrypt(
 ): Promise<Uint8Array> {
     const cryptoKey = await crypto.subtle.importKey(
         "raw",
-        keyBytes,
+        asArrayBuffer(keyBytes),
         { name: "AES-GCM", length: 256 },
         false,
         ["encrypt"],
@@ -55,9 +62,9 @@ export async function cmekEncrypt(
     crypto.getRandomValues(iv);
 
     const ciphertext = await crypto.subtle.encrypt(
-        { name: "AES-GCM", iv },
+        { name: "AES-GCM", iv: asArrayBuffer(iv) },
         cryptoKey,
-        plaintext,
+        asArrayBuffer(plaintext),
     );
 
     const result = new Uint8Array(1 + IV_LENGTH + ciphertext.byteLength);
@@ -87,16 +94,16 @@ export async function cmekDecrypt(
 
     const cryptoKey = await crypto.subtle.importKey(
         "raw",
-        keyBytes,
+        asArrayBuffer(keyBytes),
         { name: "AES-GCM", length: 256 },
         false,
         ["decrypt"],
     );
 
     const plaintext = await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv },
+        { name: "AES-GCM", iv: asArrayBuffer(iv) },
         cryptoKey,
-        ciphertext,
+        asArrayBuffer(ciphertext),
     );
 
     return new Uint8Array(plaintext);

@@ -13,19 +13,32 @@ import { errorFromResponse, PaymentRequiredError } from "./errors";
 export class HttpClient {
     private baseUrl: string;
     private token?: string;
+    private tokenExpiresAt = 0;
     private signer?: X402Signer;
     private maxAutoPayUsd: number;
+    private agentCredentials?: { agentId: string; apiKey: string };
+    private refreshPromise?: Promise<void>;
+
+    private static readonly REFRESH_BUFFER_MS = 60_000;
 
     constructor(config: OneclawClientConfig) {
         this.baseUrl = config.baseUrl.replace(/\/$/, "");
         this.token = config.token;
         this.signer = config.x402Signer;
         this.maxAutoPayUsd = config.maxAutoPayUsd ?? 0;
+
+        if (config.agentId && config.apiKey) {
+            this.agentCredentials = {
+                agentId: config.agentId,
+                apiKey: config.apiKey,
+            };
+        }
     }
 
     /** Replace the current Bearer token (called by auth methods). */
     setToken(token: string): void {
         this.token = token;
+        this.tokenExpiresAt = HttpClient.decodeExpiry(token);
     }
 
     getToken(): string | undefined {
@@ -34,6 +47,61 @@ export class HttpClient {
 
     getBaseUrl(): string {
         return this.baseUrl;
+    }
+
+    private static decodeExpiry(jwt: string): number {
+        try {
+            const parts = jwt.split(".");
+            if (parts.length !== 3) return 0;
+            const payload = JSON.parse(
+                atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")),
+            );
+            return typeof payload.exp === "number" ? payload.exp * 1000 : 0;
+        } catch {
+            return 0;
+        }
+    }
+
+    private async ensureToken(): Promise<void> {
+        if (!this.agentCredentials) return;
+        if (
+            this.token &&
+            Date.now() < this.tokenExpiresAt - HttpClient.REFRESH_BUFFER_MS
+        )
+            return;
+
+        if (this.refreshPromise) {
+            await this.refreshPromise;
+            return;
+        }
+
+        this.refreshPromise = (async () => {
+            const res = await fetch(`${this.baseUrl}/v1/auth/agent-token`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    agent_id: this.agentCredentials!.agentId,
+                    api_key: this.agentCredentials!.apiKey,
+                }),
+            });
+
+            if (!res.ok) {
+                throw new Error(
+                    `Agent token refresh failed: HTTP ${res.status}`,
+                );
+            }
+
+            const data = (await res.json()) as {
+                access_token: string;
+                expires_in: number;
+            };
+            this.token = data.access_token;
+            this.tokenExpiresAt = Date.now() + data.expires_in * 1000;
+        })().finally(() => {
+            this.refreshPromise = undefined;
+        });
+
+        await this.refreshPromise;
     }
 
     /**
@@ -50,6 +118,7 @@ export class HttpClient {
             headers?: Record<string, string>;
         } = {},
     ): Promise<OneclawResponse<T>> {
+        await this.ensureToken();
         const url = this.buildUrl(path, options.query);
         const headers: Record<string, string> = {
             "Content-Type": "application/json",
@@ -108,6 +177,7 @@ export class HttpClient {
             headers?: Record<string, string>;
         } = {},
     ): Promise<T> {
+        await this.ensureToken();
         const url = this.buildUrl(path, options.query);
         const headers: Record<string, string> = {
             "Content-Type": "application/json",

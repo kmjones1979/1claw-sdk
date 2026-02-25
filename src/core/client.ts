@@ -68,8 +68,8 @@ export class OneclawClient {
     constructor(config: OneclawClientConfig) {
         this.http = new HttpClient(config);
 
-        if (config.apiKey && !config.token) {
-            this.autoAuthenticate(config);
+        if (config.apiKey && !config.token && !config.agentId) {
+            this.autoAuthenticateUserKey(config);
         }
 
         this.vault = new VaultResource(this.http);
@@ -87,41 +87,15 @@ export class OneclawClient {
         this.x402 = new X402Resource(this.http, config.x402Signer);
     }
 
-    /**
-     * When an API key is provided without a pre-existing token, lazily
-     * exchange it for a JWT on construction. This is async but fires
-     * without blocking the constructor — the first actual request
-     * will await token resolution.
-     */
-    private autoAuthenticate(config: OneclawClientConfig): void {
-        const authPromise = config.agentId
-            ? this.http
-                  .request<{ access_token: string }>(
-                      "POST",
-                      "/v1/auth/agent-token",
-                      {
-                          body: {
-                              agent_id: config.agentId,
-                              api_key: config.apiKey,
-                          },
-                      },
-                  )
-                  .then((res) => {
-                      if (res.data?.access_token)
-                          this.http.setToken(res.data.access_token);
-                  })
-            : this.http
-                  .request<{ access_token: string }>(
-                      "POST",
-                      "/v1/auth/api-key-token",
-                      {
-                          body: { api_key: config.apiKey },
-                      },
-                  )
-                  .then((res) => {
-                      if (res.data?.access_token)
-                          this.http.setToken(res.data.access_token);
-                  });
+    private autoAuthenticateUserKey(config: OneclawClientConfig): void {
+        const authPromise = this.http
+            .request<{ access_token: string }>("POST", "/v1/auth/api-key-token", {
+                body: { api_key: config.apiKey },
+            })
+            .then((res) => {
+                if (res.data?.access_token)
+                    this.http.setToken(res.data.access_token);
+            });
 
         authPromise.catch(() => {
             /* auth failure will surface on the next request */
