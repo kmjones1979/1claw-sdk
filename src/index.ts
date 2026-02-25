@@ -19,6 +19,16 @@ export { ApiKeysResource } from "./resources/api-keys";
 export { ChainsResource } from "./resources/chains";
 export { X402Resource } from "./resources/x402";
 
+// CMEK (Customer-Managed Encryption Keys)
+export {
+    generateCmekKey,
+    cmekFingerprint,
+    cmekEncrypt,
+    cmekDecrypt,
+    toBase64,
+    fromBase64,
+} from "./cmek";
+
 // Errors
 export {
     OneclawError,
@@ -68,6 +78,8 @@ export type {
     ApiKeyListResponse,
     // Vaults
     CreateVaultRequest,
+    EnableCmekRequest,
+    CmekRotationJobResponse,
     VaultResponse,
     VaultListResponse,
     // Secrets

@@ -149,10 +149,30 @@ export interface VaultResponse {
     created_by: string;
     created_by_type: string;
     created_at: string;
+    cmek_enabled?: boolean;
+    cmek_fingerprint?: string;
 }
 
 export interface VaultListResponse {
     vaults: VaultResponse[];
+}
+
+export interface EnableCmekRequest {
+    fingerprint: string;
+}
+
+export interface CmekRotationJobResponse {
+    id: string;
+    vault_id: string;
+    old_fingerprint: string;
+    new_fingerprint: string;
+    status: string;
+    total_secrets: number;
+    processed: number;
+    error?: string;
+    started_at?: string;
+    completed_at?: string;
+    created_at: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -181,6 +201,7 @@ export interface SecretResponse {
     created_by: string;
     created_at: string;
     expires_at?: string;
+    cmek_encrypted?: boolean;
 }
 
 export interface SecretListResponse {
