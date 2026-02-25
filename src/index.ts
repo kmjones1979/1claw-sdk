@@ -23,6 +23,7 @@ export { X402Resource } from "./resources/x402";
 export {
     OneclawError,
     AuthError,
+    ResourceLimitExceededError,
     PaymentRequiredError,
     ApprovalRequiredError,
     NotFoundError,
@@ -56,6 +57,10 @@ export type {
     SignupRequest,
     TokenResponse,
     ChangePasswordRequest,
+    // Account management
+    UserProfileResponse,
+    UpdateProfileRequest,
+    DeleteAccountRequest,
     // API Keys
     CreateApiKeyRequest,
     ApiKeyResponse,
@@ -82,6 +87,7 @@ export type {
     AgentCreatedResponse,
     AgentListResponse,
     AgentKeyRotatedResponse,
+    AgentSelfResponse,
     // Chains
     ChainResponse,
     ChainListResponse,

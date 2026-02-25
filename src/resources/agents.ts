@@ -6,6 +6,7 @@ import type {
     AgentCreatedResponse,
     AgentListResponse,
     AgentKeyRotatedResponse,
+    AgentSelfResponse,
     SubmitTransactionRequest,
     SimulateTransactionRequest,
     SimulateBundleRequest,
@@ -33,6 +34,11 @@ export class AgentsResource {
         return this.http.request<AgentCreatedResponse>("POST", "/v1/agents", {
             body: options,
         });
+    }
+
+    /** Fetch the calling agent's own profile (includes `created_by`). */
+    async getSelf(): Promise<OneclawResponse<AgentSelfResponse>> {
+        return this.http.request<AgentSelfResponse>("GET", "/v1/agents/me");
     }
 
     /** Fetch a single agent by ID. */

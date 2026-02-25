@@ -69,14 +69,14 @@ await client.auth.google({ id_token: "..." });
 | `client.vault`     | `create`, `get`, `list`, `delete`                                                                                   |
 | `client.secrets`   | `set`, `get`, `delete`, `list`, `rotate`                                                                            |
 | `client.access`    | `grantHuman`, `grantAgent`, `update`, `revoke`, `listGrants`                                                        |
-| `client.agents`    | `create`, `get`, `list`, `update`, `delete`, `rotateKey`, `submitTransaction`, `getTransaction`, `listTransactions` |
+| `client.agents`    | `create`, `getSelf`, `get`, `list`, `update`, `delete`, `rotateKey`, `submitTransaction`, `getTransaction`, `listTransactions`, `simulateTransaction`, `simulateBundle` |
 | `client.chains`    | `list`, `get`, `adminList`, `create`, `update`, `delete`                                                            |
 | `client.sharing`   | `create`, `access`, `listOutbound`, `listInbound`, `accept`, `decline`, `revoke`                                    |
 | `client.approvals` | `request`, `list`, `approve`, `deny`, `check`, `subscribe`                                                          |
 | `client.billing`   | `usage`, `history`                                                                                                  |
 | `client.audit`     | `query`                                                                                                             |
 | `client.org`       | `listMembers`, `updateMemberRole`, `removeMember`                                                                   |
-| `client.auth`      | `login`, `agentToken`, `apiKeyToken`, `google`, `changePassword`, `logout`                                          |
+| `client.auth`      | `login`, `signup`, `agentToken`, `apiKeyToken`, `google`, `changePassword`, `logout`, `getMe`, `updateMe`, `deleteMe` |
 | `client.apiKeys`   | `create`, `list`, `revoke`                                                                                          |
 | `client.x402`      | `getPaymentRequirement`, `pay`, `verifyReceipt`, `withPayment`                                                      |
 
@@ -112,6 +112,7 @@ The SDK exports a typed error hierarchy for catch-based flows:
 | `OneclawError`          | any         | Base error class                                      |
 | `AuthError`             | 401, 403    | Authentication/authorization failure                  |
 | `PaymentRequiredError`  | 402         | x402 payment required (includes `paymentRequirement`) |
+| `ResourceLimitExceededError` | 403    | Tier limit reached (vaults, agents, secrets)          |
 | `ApprovalRequiredError` | 403         | Human approval gate triggered                         |
 | `NotFoundError`         | 404         | Resource not found                                    |
 | `RateLimitError`        | 429         | Rate limit exceeded                                   |

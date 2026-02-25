@@ -65,6 +65,43 @@ export type SignupRequest = ApiSchemas["SignupRequest"];
 
 export type ChangePasswordRequest = ApiSchemas["ChangePasswordRequest"];
 
+// Account management
+export interface UserProfileResponse {
+    id: string;
+    email: string;
+    display_name: string;
+    auth_method: string;
+    role: string;
+    email_verified: boolean;
+    marketing_emails: boolean;
+    totp_enabled: boolean;
+    created_at: string;
+}
+
+export interface UpdateProfileRequest {
+    display_name?: string;
+    marketing_emails?: boolean;
+}
+
+export interface DeleteAccountRequest {
+    confirm: string;
+}
+
+// Agent self profile
+export interface AgentSelfResponse {
+    id: string;
+    name: string;
+    description: string;
+    org_id: string;
+    scopes: string[];
+    is_active: boolean;
+    crypto_proxy_enabled: boolean;
+    created_by?: string;
+    created_at: string;
+    expires_at?: string;
+    last_active_at?: string;
+}
+
 // Auth response — hand-written (stricter required fields)
 export interface TokenResponse {
     access_token: string;

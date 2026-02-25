@@ -7,6 +7,9 @@ import type {
     SignupRequest,
     ChangePasswordRequest,
     TokenResponse,
+    UserProfileResponse,
+    UpdateProfileRequest,
+    DeleteAccountRequest,
     OneclawResponse,
 } from "../types";
 
@@ -123,5 +126,28 @@ export class AuthResource {
         const res = await this.http.request<void>("DELETE", "/v1/auth/token");
         this.http.setToken("");
         return res;
+    }
+
+    /** Get the current user's profile. */
+    async getMe(): Promise<OneclawResponse<UserProfileResponse>> {
+        return this.http.request<UserProfileResponse>("GET", "/v1/auth/me");
+    }
+
+    /** Update the current user's profile (display name, marketing opt-in). */
+    async updateMe(
+        update: UpdateProfileRequest,
+    ): Promise<OneclawResponse<UserProfileResponse>> {
+        return this.http.request<UserProfileResponse>("PATCH", "/v1/auth/me", {
+            body: update,
+        });
+    }
+
+    /** Delete the current user's account and all associated data. */
+    async deleteMe(
+        request: DeleteAccountRequest,
+    ): Promise<OneclawResponse<void>> {
+        return this.http.request<void>("DELETE", "/v1/auth/me", {
+            body: request,
+        });
     }
 }

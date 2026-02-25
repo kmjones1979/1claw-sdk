@@ -32,6 +32,17 @@ export class AuthError extends OneclawError {
 }
 
 /**
+ * Thrown when a resource limit is exceeded (403 with type "resource_limit_exceeded").
+ * The `detail` message includes the current count, limit, and tier.
+ */
+export class ResourceLimitExceededError extends OneclawError {
+    constructor(message: string) {
+        super(message, 403, "resource_limit_exceeded");
+        this.name = "ResourceLimitExceededError";
+    }
+}
+
+/**
  * Thrown on 402 Payment Required responses.
  * Contains the full `PaymentRequirement` so callers can inspect
  * price, network, and payment address before deciding to pay.
@@ -133,8 +144,18 @@ export async function errorFromResponse(res: Response): Promise<OneclawError> {
                 body.fields as Record<string, string>,
             );
         case 401:
-        case 403:
-            return new AuthError(message, res.status as 401 | 403);
+            return new AuthError(message, 401);
+        case 403: {
+            const errorType = body.type as string;
+            if (errorType === "resource_limit_exceeded") {
+                return new ResourceLimitExceededError(message);
+            }
+            if (errorType === "approval_required") {
+                const approvalId = (body.approval_request_id as string) ?? "";
+                return new ApprovalRequiredError(approvalId, message);
+            }
+            return new AuthError(message, 403);
+        }
         case 402: {
             const requirement = body as unknown as PaymentRequirement;
             return new PaymentRequiredError(message, requirement);
