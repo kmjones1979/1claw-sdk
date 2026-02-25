@@ -382,6 +382,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/vaults/{vault_id}/cmek": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enable CMEK on a vault
+         * @description Enable client-side encryption on a vault. Requires Business or Enterprise plan.
+         *     Only the key's SHA-256 fingerprint is stored — the key never touches the server.
+         */
+        post: operations["enableCmek"];
+        /**
+         * Disable CMEK on a vault
+         * @description Disable client-side encryption. Existing CMEK-encrypted secrets still require
+         *     the key to decrypt. New secrets will use HSM-only encryption.
+         */
+        delete: operations["disableCmek"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/vaults/{vault_id}/cmek-rotate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start server-assisted CMEK key rotation
+         * @description Re-encrypts all secrets from the old CMEK key to the new one.
+         *     Keys are passed in headers (TLS-only) and exist in server memory
+         *     only during the rotation. Batched in groups of 100 secrets.
+         */
+        post: operations["rotateCmek"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/vaults/{vault_id}/cmek-rotate/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get CMEK rotation job status */
+        get: operations["getCmekRotationJob"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/vaults/{vault_id}/secrets": {
         parameters: {
             query?: never;
@@ -1328,9 +1393,40 @@ export interface components {
             created_by_type?: string;
             /** Format: date-time */
             created_at: string;
+            /** @description Whether client-managed encryption is enabled */
+            cmek_enabled?: boolean;
+            /** @description SHA-256 fingerprint of the CMEK key (64 hex chars) */
+            cmek_fingerprint?: string;
         };
         VaultListResponse: {
             vaults?: components["schemas"]["VaultResponse"][];
+        };
+        EnableCmekRequest: {
+            /** @description SHA-256 hex fingerprint of the CMEK key (64 chars) */
+            fingerprint: string;
+        };
+        CmekRotateRequest: {
+            /** @description SHA-256 hex fingerprint of the new CMEK key */
+            new_fingerprint: string;
+        };
+        CmekRotationJobResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            vault_id: string;
+            old_fingerprint?: string;
+            new_fingerprint?: string;
+            /** @enum {string} */
+            status: "pending" | "running" | "completed" | "failed";
+            total_secrets: number;
+            processed: number;
+            error?: string;
+            /** Format: date-time */
+            started_at?: string;
+            /** Format: date-time */
+            completed_at?: string;
+            /** Format: date-time */
+            created_at: string;
         };
         PutSecretRequest: {
             /**
@@ -1378,6 +1474,8 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             expires_at?: string;
+            /** @description Whether this secret value is CMEK-encrypted (requires client-side decryption) */
+            cmek_encrypted?: boolean;
         };
         SecretListResponse: {
             secrets?: components["schemas"]["SecretMetadataResponse"][];
@@ -1437,6 +1535,10 @@ export interface components {
             tx_max_value_eth?: string;
             tx_daily_limit_eth?: string;
             tx_allowed_chains?: string[];
+            /** @description Per-agent token TTL in seconds (overrides global default) */
+            token_ttl_seconds?: number | null;
+            /** @description Restrict agent to specific vault UUIDs (empty = all vaults in org) */
+            vault_ids?: string[];
         };
         UpdateAgentRequest: {
             name?: string;
@@ -1449,6 +1551,8 @@ export interface components {
             tx_max_value_eth?: string;
             tx_daily_limit_eth?: string;
             tx_allowed_chains?: string[];
+            token_ttl_seconds?: number | null;
+            vault_ids?: string[];
         };
         AgentResponse: {
             /** Format: uuid */
@@ -1463,6 +1567,8 @@ export interface components {
             tx_max_value_eth?: string;
             tx_daily_limit_eth?: string;
             tx_allowed_chains?: string[];
+            token_ttl_seconds?: number | null;
+            vault_ids?: string[];
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
@@ -2570,6 +2676,113 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    enableCmek: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                vault_id: components["parameters"]["VaultId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnableCmekRequest"];
+            };
+        };
+        responses: {
+            /** @description CMEK enabled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VaultResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    disableCmek: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                vault_id: components["parameters"]["VaultId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CMEK disabled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VaultResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    rotateCmek: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Base64-encoded old CMEK key (32 bytes) */
+                "x-cmek-old-key": string;
+                /** @description Base64-encoded new CMEK key (32 bytes) */
+                "x-cmek-new-key": string;
+            };
+            path: {
+                vault_id: components["parameters"]["VaultId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CmekRotateRequest"];
+            };
+        };
+        responses: {
+            /** @description Rotation job started */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CmekRotationJobResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    getCmekRotationJob: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                vault_id: components["parameters"]["VaultId"];
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Rotation job status */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CmekRotationJobResponse"];
+                };
             };
             404: components["responses"]["NotFound"];
         };

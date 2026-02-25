@@ -172,6 +172,59 @@ Key properties:
 - **Every transaction is audit-logged** with full calldata
 - **Revocable instantly** — set `crypto_proxy_enabled: false` to cut off access
 
+## Customer-Managed Encryption Keys (CMEK)
+
+For enterprises that require cryptographic proof that 1claw cannot access their secrets unilaterally, the SDK provides client-side CMEK utilities. Keys are generated and managed entirely on your side — only the SHA-256 fingerprint is stored on the server.
+
+```typescript
+import { cmek } from "@1claw/sdk";
+
+// Generate a 256-bit AES key (returns CryptoKey)
+const key = await cmek.generateCmekKey();
+
+// Compute fingerprint (SHA-256 hex)
+const fingerprint = await cmek.cmekFingerprint(key);
+
+// Enable CMEK on a vault
+await client.vault.enableCmek(vaultId, { fingerprint });
+
+// Encrypt a secret value before storing
+const encrypted = await cmek.cmekEncrypt(key, "my-secret-value");
+await client.secrets.set(vaultId, "path/to/secret", encrypted);
+
+// Decrypt after retrieving
+const res = await client.secrets.get(vaultId, "path/to/secret");
+const plaintext = await cmek.cmekDecrypt(key, res.data.value);
+```
+
+### Server-assisted key rotation
+
+```typescript
+await client.vault.rotateCmek(vaultId, oldKey, newKey, {
+    new_fingerprint: await cmek.cmekFingerprint(newKey),
+});
+```
+
+The server re-encrypts all secrets in batches of 100. Poll rotation status:
+
+```typescript
+const job = await client.vault.getRotationJobStatus(vaultId, jobId);
+console.log(job.data?.status, job.data?.processed, "/", job.data?.total_secrets);
+```
+
+## Agent Token Auto-Refresh
+
+When using agent credentials (`agentId` + `apiKey`), the SDK automatically refreshes tokens 60 seconds before expiry. No manual token management needed:
+
+```typescript
+const client = createClient({
+    baseUrl: "https://api.1claw.xyz",
+    apiKey: "ocv_...",
+    agentId: "agent-uuid",
+});
+// Tokens refresh transparently — just make API calls
+```
+
 ## x402 Payment Protocol
 
 When free-tier limits are exceeded, the API returns `402 Payment Required`. The SDK can automatically handle payments if you provide a signer:
