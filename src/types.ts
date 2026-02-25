@@ -1,5 +1,17 @@
+import type { components } from "./generated/api-types";
+
+// Re-export the full generated types for advanced users who want raw
+// spec-exact types (e.g. for openapi-fetch or custom codegen).
+export type { paths, components, operations } from "./generated/api-types";
+
+/**
+ * Convenience alias for the generated component schemas.
+ * Usage: `ApiSchemas["VaultResponse"]`, `ApiSchemas["AgentResponse"]`, etc.
+ */
+export type ApiSchemas = components["schemas"];
+
 // ---------------------------------------------------------------------------
-// Client configuration
+// Client configuration (SDK-only, not in the API spec)
 // ---------------------------------------------------------------------------
 
 export interface OneclawClientConfig {
@@ -17,10 +29,12 @@ export interface OneclawClientConfig {
     maxAutoPayUsd?: number;
     /** Network for x402 payments (default: "eip155:8453" — Base). */
     network?: string;
+    /** Optional plugin registry for extending the SDK with custom providers. */
+    plugins?: import("./plugins").PluginRegistry;
 }
 
 // ---------------------------------------------------------------------------
-// Standard response envelope
+// Standard response envelope (SDK-only)
 // ---------------------------------------------------------------------------
 
 export interface OneclawResponse<T> {
@@ -35,33 +49,23 @@ export interface ResponseMeta {
 }
 
 // ---------------------------------------------------------------------------
-// Auth
+// Auth — request types from generated spec
 // ---------------------------------------------------------------------------
 
-export interface TokenRequest {
-    email: string;
-    password: string;
-}
+/** Login with email and password. Named `LoginRequest` in the OpenAPI spec. */
+export type TokenRequest = ApiSchemas["LoginRequest"];
 
-export interface AgentTokenRequest {
-    agent_id: string;
-    api_key: string;
-}
+export type AgentTokenRequest = ApiSchemas["AgentTokenRequest"];
 
-export interface UserApiKeyTokenRequest {
-    api_key: string;
-}
+export type UserApiKeyTokenRequest = ApiSchemas["UserApiKeyTokenRequest"];
 
-export interface GoogleAuthRequest {
-    id_token: string;
-}
+export type GoogleAuthRequest = ApiSchemas["GoogleAuthRequest"];
 
-export interface SignupRequest {
-    email: string;
-    password: string;
-    display_name?: string;
-}
+export type SignupRequest = ApiSchemas["SignupRequest"];
 
+export type ChangePasswordRequest = ApiSchemas["ChangePasswordRequest"];
+
+// Auth response — hand-written (stricter required fields)
 export interface TokenResponse {
     access_token: string;
     token_type: string;
@@ -69,20 +73,11 @@ export interface TokenResponse {
     refresh_token?: string;
 }
 
-export interface ChangePasswordRequest {
-    current_password: string;
-    new_password: string;
-}
-
 // ---------------------------------------------------------------------------
-// API Keys
+// API Keys — request types from generated spec, responses hand-written
 // ---------------------------------------------------------------------------
 
-export interface CreateApiKeyRequest {
-    name: string;
-    scopes?: string[];
-    expires_at?: string;
-}
+export type CreateApiKeyRequest = ApiSchemas["CreateApiKeyRequest"];
 
 export interface ApiKeyResponse {
     id: string;
@@ -105,13 +100,10 @@ export interface ApiKeyListResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Vaults
+// Vaults — request types from generated spec, responses hand-written
 // ---------------------------------------------------------------------------
 
-export interface CreateVaultRequest {
-    name: string;
-    description?: string;
-}
+export type CreateVaultRequest = ApiSchemas["CreateVaultRequest"];
 
 export interface VaultResponse {
     id: string;
@@ -127,17 +119,10 @@ export interface VaultListResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Secrets
+// Secrets — request types from generated spec, responses hand-written
 // ---------------------------------------------------------------------------
 
-export interface PutSecretRequest {
-    type: string;
-    value: string;
-    metadata?: Record<string, unknown>;
-    expires_at?: string;
-    rotation_policy?: Record<string, unknown>;
-    max_access_count?: number;
-}
+export type PutSecretRequest = ApiSchemas["PutSecretRequest"];
 
 export interface SecretMetadataResponse {
     id: string;
@@ -166,23 +151,12 @@ export interface SecretListResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Policies (Access Control)
+// Policies (Access Control) — request types from generated spec
 // ---------------------------------------------------------------------------
 
-export interface CreatePolicyRequest {
-    secret_path_pattern: string;
-    principal_type: string;
-    principal_id: string;
-    permissions: string[];
-    conditions?: Record<string, unknown>;
-    expires_at?: string;
-}
+export type CreatePolicyRequest = ApiSchemas["CreatePolicyRequest"];
 
-export interface UpdatePolicyRequest {
-    permissions: string[];
-    conditions?: Record<string, unknown>;
-    expires_at?: string;
-}
+export type UpdatePolicyRequest = ApiSchemas["UpdatePolicyRequest"];
 
 export interface PolicyResponse {
     id: string;
@@ -203,43 +177,27 @@ export interface PolicyListResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Agents
+// Agents — request types from generated spec, responses hand-written
 // ---------------------------------------------------------------------------
 
+/**
+ * Hand-written: generated version marks `crypto_proxy_enabled` as required
+ * (with default false), but SDK callers expect it to be optional.
+ */
 export interface CreateAgentRequest {
     name: string;
     description?: string;
     auth_method?: string;
     scopes?: string[];
     expires_at?: string;
-    /** Enable the crypto transaction proxy for this agent (default: false). */
     crypto_proxy_enabled?: boolean;
-    /** Allowlist of destination addresses this agent may send to. Empty = unrestricted. */
     tx_to_allowlist?: string[];
-    /** Maximum value in ETH per single transaction (e.g. "1.5"). Null = unlimited. */
     tx_max_value_eth?: string;
-    /** Maximum cumulative spend in ETH over a rolling 24-hour window. Null = unlimited. */
     tx_daily_limit_eth?: string;
-    /** Chains this agent may transact on (e.g. ["base","sepolia"]). Empty = all enabled chains. */
     tx_allowed_chains?: string[];
 }
 
-export interface UpdateAgentRequest {
-    name?: string;
-    scopes?: string[];
-    is_active?: boolean;
-    expires_at?: string | null;
-    /** Toggle the crypto transaction proxy for this agent. */
-    crypto_proxy_enabled?: boolean;
-    /** Allowlist of destination addresses. Pass empty array to clear. */
-    tx_to_allowlist?: string[];
-    /** Max ETH per transaction. Pass null to remove limit. */
-    tx_max_value_eth?: string | null;
-    /** Max ETH per 24h rolling window. Pass null to remove limit. */
-    tx_daily_limit_eth?: string | null;
-    /** Allowed chains. Pass empty array to allow all. */
-    tx_allowed_chains?: string[];
-}
+export type UpdateAgentRequest = ApiSchemas["UpdateAgentRequest"];
 
 export interface AgentResponse {
     id: string;
@@ -248,15 +206,10 @@ export interface AgentResponse {
     auth_method: string;
     scopes: string[];
     is_active: boolean;
-    /** Whether this agent can submit transactions through the signing proxy. */
     crypto_proxy_enabled: boolean;
-    /** Destination address allowlist (empty = unrestricted). */
     tx_to_allowlist?: string[];
-    /** Max ETH per single transaction. */
     tx_max_value_eth?: string;
-    /** Max ETH spend per rolling 24h window. */
     tx_daily_limit_eth?: string;
-    /** Chains this agent may transact on (empty = all). */
     tx_allowed_chains?: string[];
     created_at: string;
     expires_at?: string;
@@ -277,7 +230,7 @@ export interface AgentKeyRotatedResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Chains
+// Chains — request types from generated spec, responses hand-written
 // ---------------------------------------------------------------------------
 
 export interface ChainResponse {
@@ -299,6 +252,10 @@ export interface ChainListResponse {
     chains: ChainResponse[];
 }
 
+/**
+ * Hand-written: generated version marks `native_currency`, `is_testnet`,
+ * `is_enabled` as required (with defaults), but SDK callers expect optional.
+ */
 export interface CreateChainRequest {
     name: string;
     display_name: string;
@@ -311,66 +268,37 @@ export interface CreateChainRequest {
     is_enabled?: boolean;
 }
 
-export interface UpdateChainRequest {
-    display_name?: string;
-    rpc_url?: string;
-    ws_url?: string;
-    explorer_url?: string;
-    native_currency?: string;
-    is_testnet?: boolean;
-    is_enabled?: boolean;
-}
+export type UpdateChainRequest = ApiSchemas["UpdateChainRequest"];
 
 // ---------------------------------------------------------------------------
-// Transactions (Crypto Proxy)
+// Transactions (Crypto Proxy) — request types from generated spec
 // ---------------------------------------------------------------------------
 
+/**
+ * Hand-written: generated version marks `simulate_first` as required
+ * (with default false), but SDK callers expect it to be optional.
+ */
 export interface SubmitTransactionRequest {
-    /** Destination address (0x-prefixed). */
     to: string;
-    /** Value in ETH as a decimal string (e.g. "0.01"). */
     value: string;
-    /** Chain name ("base", "ethereum", …) or numeric chain ID. */
     chain: string;
-    /** Hex-encoded calldata for contract interactions. */
     data?: string;
-    /** Vault path to the signing key. Defaults to `keys/{chain}-signer`. */
     signing_key_path?: string;
-    /** Transaction nonce. Auto-resolved from RPC when omitted. */
     nonce?: number;
-    /** Gas price in wei (legacy). Defaults to 1 gwei. Ignored when EIP-1559 fields are set. */
     gas_price?: string;
-    /** Gas limit. Defaults to 21 000. */
     gas_limit?: number;
-    /** EIP-1559 max fee per gas in wei. When set, uses Type 2 signing. */
     max_fee_per_gas?: string;
-    /** EIP-1559 max priority fee per gas in wei. */
     max_priority_fee_per_gas?: string;
-    /** When true, simulate via Tenderly before signing. If simulation reverts, returns 422. */
     simulate_first?: boolean;
 }
 
-export interface SimulateTransactionRequest {
-    to: string;
-    value: string;
-    chain: string;
-    data?: string;
-    signing_key_path?: string;
-    gas_limit?: number;
-}
+export type SimulateTransactionRequest = ApiSchemas["SimulateTransactionRequest"];
 
 export interface SimulateBundleRequest {
     transactions: SimulateBundleItem[];
 }
 
-export interface SimulateBundleItem {
-    to: string;
-    value: string;
-    chain: string;
-    data?: string;
-    signing_key_path?: string;
-    gas_limit?: number;
-}
+export type SimulateBundleItem = ApiSchemas["SimulateTransactionRequest"];
 
 export interface BalanceChange {
     address: string;
@@ -423,20 +351,10 @@ export interface TransactionListResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Sharing
+// Sharing — request type from generated spec (has precise enum)
 // ---------------------------------------------------------------------------
 
-export interface CreateShareRequest {
-    recipient_type: string;
-    recipient_id?: string;
-    /** Email address for invite-by-email shares (recipient_type = "external_email"). */
-    email?: string;
-    permissions?: string[];
-    max_access_count?: number;
-    expires_at: string;
-    passphrase?: string;
-    ip_allowlist?: string[];
-}
+export type CreateShareRequest = ApiSchemas["CreateShareRequest"];
 
 export interface ShareResponse {
     id: string;
@@ -457,7 +375,7 @@ export interface SharedSecretResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Organization
+// Organization — request type from generated spec (has precise enum)
 // ---------------------------------------------------------------------------
 
 export interface OrgMemberResponse {
@@ -473,12 +391,10 @@ export interface OrgMemberListResponse {
     members: OrgMemberResponse[];
 }
 
-export interface UpdateMemberRoleRequest {
-    role: "owner" | "admin" | "member";
-}
+export type UpdateMemberRoleRequest = ApiSchemas["UpdateMemberRoleRequest"];
 
 // ---------------------------------------------------------------------------
-// Billing & Usage
+// Billing & Usage — hand-written (generated inline types differ structurally)
 // ---------------------------------------------------------------------------
 
 export interface MonthSummary {
@@ -511,7 +427,7 @@ export interface UsageHistoryResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Audit
+// Audit — hand-written (AuditQuery is SDK-only, not in the spec)
 // ---------------------------------------------------------------------------
 
 export interface AuditQuery {
@@ -543,7 +459,7 @@ export interface AuditEventsResponse {
 }
 
 // ---------------------------------------------------------------------------
-// x402 Payment Protocol
+// x402 Payment Protocol — hand-written (SDK-specific signer interface)
 // ---------------------------------------------------------------------------
 
 export interface PaymentAccept {
@@ -587,7 +503,7 @@ export interface X402Signer {
 }
 
 // ---------------------------------------------------------------------------
-// Approvals (Human-in-the-loop) — future API
+// Approvals (Human-in-the-loop) — hand-written (not fully in spec yet)
 // ---------------------------------------------------------------------------
 
 export interface ApprovalRequest {
@@ -614,7 +530,7 @@ export interface ApprovalListResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Admin
+// Admin — hand-written (stricter required fields)
 // ---------------------------------------------------------------------------
 
 export interface SettingResponse {
@@ -646,7 +562,7 @@ export interface HealthResponse {
 }
 
 // ---------------------------------------------------------------------------
-// MCP Tool definitions
+// MCP Tool definitions (SDK-only, not in the API spec)
 // ---------------------------------------------------------------------------
 
 export interface McpToolDefinition {

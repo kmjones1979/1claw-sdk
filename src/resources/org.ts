@@ -1,10 +1,10 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     OrgMemberResponse,
     OrgMemberListResponse,
     UpdateMemberRoleRequest,
     OneclawResponse,
-} from "./types";
+} from "../types";
 
 /**
  * Org resource — manage organization membership and roles.

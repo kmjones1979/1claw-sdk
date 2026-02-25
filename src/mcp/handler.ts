@@ -1,5 +1,5 @@
 import type { McpToolResult } from "../types";
-import type { OneclawClient } from "../client";
+import type { OneclawClient } from "../core/client";
 
 type ToolArgs = Record<string, unknown>;
 

@@ -1,11 +1,11 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     ChainResponse,
     ChainListResponse,
     CreateChainRequest,
     UpdateChainRequest,
     OneclawResponse,
-} from "./types";
+} from "../types";
 
 /**
  * Chains resource — list supported blockchains and manage chain configuration.

@@ -1,4 +1,4 @@
-import type { PaymentRequirement } from "./types";
+import type { PaymentRequirement } from "../types";
 
 /**
  * Base error class for all 1Claw SDK errors.

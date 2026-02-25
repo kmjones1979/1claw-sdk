@@ -1,9 +1,9 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     UsageSummaryResponse,
     UsageHistoryResponse,
     OneclawResponse,
-} from "./types";
+} from "../types";
 
 /**
  * Billing resource — view API usage summaries and per-request history.

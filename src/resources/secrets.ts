@@ -1,11 +1,11 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     PutSecretRequest,
     SecretResponse,
     SecretMetadataResponse,
     SecretListResponse,
     OneclawResponse,
-} from "./types";
+} from "../types";
 
 export interface SetSecretOptions {
     type?: string;

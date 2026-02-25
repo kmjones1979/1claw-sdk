@@ -1,5 +1,5 @@
-import type { HttpClient } from "./http";
-import type { AuditQuery, AuditEventsResponse, OneclawResponse } from "./types";
+import type { HttpClient } from "../core/http";
+import type { AuditQuery, AuditEventsResponse, OneclawResponse } from "../types";
 
 /**
  * Audit resource — query the immutable audit log of all vault operations.

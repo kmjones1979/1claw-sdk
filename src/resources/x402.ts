@@ -1,12 +1,12 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     PaymentRequirement,
     PaymentReceipt,
     X402Signer,
     SecretResponse,
     OneclawResponse,
-} from "./types";
-import { PaymentRequiredError, errorFromResponse } from "./errors";
+} from "../types";
+import { PaymentRequiredError, errorFromResponse } from "../core/errors";
 
 /**
  * x402 resource — interact with the x402 payment protocol.

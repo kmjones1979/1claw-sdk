@@ -1,4 +1,4 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     TokenRequest,
     AgentTokenRequest,
@@ -8,7 +8,7 @@ import type {
     ChangePasswordRequest,
     TokenResponse,
     OneclawResponse,
-} from "./types";
+} from "../types";
 
 /**
  * Auth resource — authenticate users and agents, manage sessions.

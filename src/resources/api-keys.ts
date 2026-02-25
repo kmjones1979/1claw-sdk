@@ -1,10 +1,10 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     CreateApiKeyRequest,
     ApiKeyCreatedResponse,
     ApiKeyListResponse,
     OneclawResponse,
-} from "./types";
+} from "../types";
 
 /**
  * ApiKeys resource — create, list, and revoke personal API keys

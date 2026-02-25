@@ -1,10 +1,10 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     ApprovalRequest,
     CreateApprovalRequest,
     ApprovalListResponse,
     OneclawResponse,
-} from "./types";
+} from "../types";
 
 /**
  * Approvals resource — human-in-the-loop approval workflows.

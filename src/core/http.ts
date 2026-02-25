@@ -3,7 +3,7 @@ import type {
     OneclawResponse,
     PaymentRequirement,
     X402Signer,
-} from "./types";
+} from "../types";
 import { errorFromResponse, PaymentRequiredError } from "./errors";
 
 /**

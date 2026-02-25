@@ -1,10 +1,10 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     CreateShareRequest,
     ShareResponse,
     SharedSecretResponse,
     OneclawResponse,
-} from "./types";
+} from "../types";
 
 export interface ShareListResponse {
     shares: ShareResponse[];

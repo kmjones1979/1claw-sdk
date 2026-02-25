@@ -1,11 +1,11 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     CreatePolicyRequest,
     UpdatePolicyRequest,
     PolicyResponse,
     PolicyListResponse,
     OneclawResponse,
-} from "./types";
+} from "../types";
 
 export interface GrantOptions {
     /** Glob pattern for which secret paths the grant covers (default: "**"). */

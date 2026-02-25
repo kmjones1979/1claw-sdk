@@ -195,6 +195,47 @@ const client = createClient({
 const secret = await client.x402.withPayment("vault-id", "key", signer);
 ```
 
+## Plugins
+
+The SDK supports optional plugin interfaces for extending behavior without modifying the core:
+
+```typescript
+import { createClient } from "@1claw/sdk";
+import type { CryptoProvider, AuditSink, PolicyEngine } from "@1claw/sdk";
+
+const client = createClient({
+    baseUrl: "https://api.1claw.xyz",
+    apiKey: "ocv_...",
+    plugins: {
+        cryptoProvider: myAwsKmsProvider,
+        auditSink: mySplunkSink,
+        policyEngine: myOpaEngine,
+    },
+});
+```
+
+| Interface        | Purpose                                                      | Default behavior              |
+| ---------------- | ------------------------------------------------------------ | ----------------------------- |
+| `CryptoProvider` | Client-side encryption (encrypt, decrypt, generateKey)       | Server-side HSM (no-op)       |
+| `AuditSink`      | Forward SDK events to external systems (Splunk, Datadog)     | No-op (server handles audit)  |
+| `PolicyEngine`   | Pre-evaluate policies locally before API calls               | No-op (server enforces)       |
+
+Implement any interface in your own package — no PRs to the SDK needed.
+
+## OpenAPI Types
+
+The SDK's request types are generated from the [OpenAPI spec](https://github.com/1clawAI/1claw-openapi-spec). Advanced users can access the raw generated types:
+
+```typescript
+import type { paths, components, operations, ApiSchemas } from "@1claw/sdk";
+
+// Access any schema from the spec
+type Vault = ApiSchemas["VaultResponse"];
+type Agent = ApiSchemas["AgentResponse"];
+```
+
+Regenerate types after spec changes: `npm run generate`
+
 ## MCP Integration (AI Agents)
 
 The SDK exposes MCP-compatible tool definitions for AI agents:

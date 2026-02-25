@@ -1,18 +1,18 @@
-import type { OneclawClientConfig } from "./types";
+import type { OneclawClientConfig } from "../types";
 import { HttpClient } from "./http";
-import { VaultResource } from "./vault";
-import { SecretsResource } from "./secrets";
-import { AccessResource } from "./access";
-import { AgentsResource } from "./agents";
-import { SharingResource } from "./sharing";
-import { ApprovalsResource } from "./approvals";
-import { BillingResource } from "./billing";
-import { AuditResource } from "./audit";
-import { OrgResource } from "./org";
-import { AuthResource } from "./auth";
-import { ApiKeysResource } from "./api-keys";
-import { ChainsResource } from "./chains";
-import { X402Resource } from "./x402";
+import { VaultResource } from "../resources/vault";
+import { SecretsResource } from "../resources/secrets";
+import { AccessResource } from "../resources/access";
+import { AgentsResource } from "../resources/agents";
+import { SharingResource } from "../resources/sharing";
+import { ApprovalsResource } from "../resources/approvals";
+import { BillingResource } from "../resources/billing";
+import { AuditResource } from "../resources/audit";
+import { OrgResource } from "../resources/org";
+import { AuthResource } from "../resources/auth";
+import { ApiKeysResource } from "../resources/api-keys";
+import { ChainsResource } from "../resources/chains";
+import { X402Resource } from "../resources/x402";
 
 /**
  * The main 1Claw SDK client. All API resources are exposed as

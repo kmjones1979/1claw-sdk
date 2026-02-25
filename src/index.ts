@@ -1,20 +1,23 @@
 // Client
-export { OneclawClient, createClient } from "./client";
+export { OneclawClient, createClient } from "./core/client";
+
+// Core internals (for advanced usage)
+export { HttpClient } from "./core/http";
 
 // Resource modules
-export { VaultResource } from "./vault";
-export { SecretsResource } from "./secrets";
-export { AccessResource } from "./access";
-export { AgentsResource } from "./agents";
-export { SharingResource } from "./sharing";
-export { ApprovalsResource } from "./approvals";
-export { BillingResource } from "./billing";
-export { AuditResource } from "./audit";
-export { OrgResource } from "./org";
-export { AuthResource } from "./auth";
-export { ApiKeysResource } from "./api-keys";
-export { ChainsResource } from "./chains";
-export { X402Resource } from "./x402";
+export { VaultResource } from "./resources/vault";
+export { SecretsResource } from "./resources/secrets";
+export { AccessResource } from "./resources/access";
+export { AgentsResource } from "./resources/agents";
+export { SharingResource } from "./resources/sharing";
+export { ApprovalsResource } from "./resources/approvals";
+export { BillingResource } from "./resources/billing";
+export { AuditResource } from "./resources/audit";
+export { OrgResource } from "./resources/org";
+export { AuthResource } from "./resources/auth";
+export { ApiKeysResource } from "./resources/api-keys";
+export { ChainsResource } from "./resources/chains";
+export { X402Resource } from "./resources/x402";
 
 // Errors
 export {
@@ -26,7 +29,19 @@ export {
     RateLimitError,
     ValidationError,
     ServerError,
-} from "./errors";
+} from "./core/errors";
+
+// Plugin interfaces
+export type {
+    CryptoProvider,
+    KeyMaterial,
+    AuditSink,
+    AuditSinkEvent,
+    PolicyEngine,
+    PolicyContext,
+    PolicyDecision,
+    PluginRegistry,
+} from "./plugins";
 
 // Types
 export type {
@@ -118,4 +133,9 @@ export type {
     // MCP
     McpToolDefinition,
     McpToolResult,
+    // Generated OpenAPI types (raw spec access)
+    paths,
+    components,
+    operations,
+    ApiSchemas,
 } from "./types";

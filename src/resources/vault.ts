@@ -1,10 +1,10 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     CreateVaultRequest,
     VaultResponse,
     VaultListResponse,
     OneclawResponse,
-} from "./types";
+} from "../types";
 
 /**
  * Vault resource — create, list, get, and delete encrypted vaults.

@@ -1,4 +1,4 @@
-import type { HttpClient } from "./http";
+import type { HttpClient } from "../core/http";
 import type {
     CreateAgentRequest,
     UpdateAgentRequest,
@@ -14,7 +14,7 @@ import type {
     TransactionResponse,
     TransactionListResponse,
     OneclawResponse,
-} from "./types";
+} from "../types";
 
 /**
  * Agents resource — register, manage, and rotate keys for AI agents
