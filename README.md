@@ -32,6 +32,8 @@ const secret = await client.secrets.get("vault-id", "OPENAI_KEY");
 console.log(secret.data?.value);
 ```
 
+**API contract:** This SDK is built from the **OpenAPI 3.1** spec. The canonical spec is published as [@1claw/openapi-spec](https://www.npmjs.com/package/@1claw/openapi-spec) (YAML/JSON). Types are generated from it; the SDK stays in sync with the API. For a full endpoint list, see the [API reference](https://docs.1claw.xyz/docs/reference/api-reference) or the spec.
+
 ## Authentication
 
 The SDK supports three authentication modes:
@@ -225,7 +227,7 @@ Implement any interface in your own package — no PRs to the SDK needed.
 
 ## OpenAPI Types
 
-The SDK's request types are generated from the [OpenAPI spec](https://github.com/1clawAI/1claw-openapi-spec). Advanced users can access the raw generated types:
+The SDK's request types are generated from the **OpenAPI 3.1** spec, published as [@1claw/openapi-spec](https://www.npmjs.com/package/@1claw/openapi-spec). Advanced users can access the raw generated types:
 
 ```typescript
 import type { paths, components, operations, ApiSchemas } from "@1claw/sdk";
