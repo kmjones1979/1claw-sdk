@@ -36,17 +36,30 @@ describe("OneclawClient", () => {
         expect(client.x402).toBeDefined();
     });
 
-    it("auto-authenticates with agent apiKey + agentId", async () => {
-        const fetcher = mockFetch(200, { access_token: "agent-jwt" });
+    it("auto-authenticates with agent apiKey + agentId on first request", async () => {
+        const fetcher = vi.fn()
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                headers: new Headers(),
+                json: () => Promise.resolve({ access_token: "agent-jwt" }),
+            } as unknown as Response)
+            .mockResolvedValueOnce({
+                ok: true,
+                status: 200,
+                headers: new Headers(),
+                json: () => Promise.resolve({ vaults: [] }),
+            } as unknown as Response);
         globalThis.fetch = fetcher;
 
-        new OneclawClient({
+        const client = new OneclawClient({
             baseUrl: "https://api.test",
             apiKey: "ocv_abc",
             agentId: "agent-uuid",
         });
 
-        await vi.waitFor(() => expect(fetcher).toHaveBeenCalled());
+        // Agent auth is lazy — fires on first request, not constructor
+        await client.vault.list();
 
         const [url, init] = fetcher.mock.calls[0];
         expect(url).toContain("/v1/auth/agent-token");
