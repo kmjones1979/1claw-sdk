@@ -287,6 +287,8 @@ export interface AgentResponse {
     oidc_client_id?: string;
     /** Ed25519 SSH public key (base64-encoded, auto-generated at creation) */
     ssh_public_key?: string;
+    /** P-256 ECDH public key (base64 SEC1 uncompressed point, auto-generated at creation) */
+    ecdh_public_key?: string;
     created_at: string;
     expires_at?: string;
     last_active_at?: string;
@@ -320,6 +322,8 @@ export interface AgentSelfResponse {
     last_active_at?: string;
     /** Ed25519 SSH public key (base64-encoded) */
     ssh_public_key?: string;
+    /** P-256 ECDH public key (base64 SEC1 uncompressed point) */
+    ecdh_public_key?: string;
 }
 
 // ---------------------------------------------------------------------------
