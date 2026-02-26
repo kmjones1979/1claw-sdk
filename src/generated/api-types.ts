@@ -1525,7 +1525,12 @@ export interface components {
         CreateAgentRequest: {
             name: string;
             description?: string;
-            auth_method?: string;
+            /**
+             * @description Authentication method. api_key generates a one-time key; mtls requires client_cert_fingerprint; oidc_client_credentials requires oidc_issuer and oidc_client_id.
+             * @default api_key
+             * @enum {string}
+             */
+            auth_method: "api_key" | "mtls" | "oidc_client_credentials";
             scopes?: string[];
             /** Format: date-time */
             expires_at?: string;
@@ -1539,6 +1544,12 @@ export interface components {
             token_ttl_seconds?: number | null;
             /** @description Restrict agent to specific vault UUIDs (empty = all vaults in org) */
             vault_ids?: string[];
+            /** @description SHA-256 fingerprint of the client certificate (required for mTLS auth) */
+            client_cert_fingerprint?: string;
+            /** @description OIDC issuer URL (required for oidc_client_credentials auth) */
+            oidc_issuer?: string;
+            /** @description OIDC client ID (required for oidc_client_credentials auth) */
+            oidc_client_id?: string;
         };
         UpdateAgentRequest: {
             name?: string;
@@ -1559,7 +1570,8 @@ export interface components {
             id: string;
             name: string;
             description?: string;
-            auth_method: string;
+            /** @enum {string} */
+            auth_method: "api_key" | "mtls" | "oidc_client_credentials";
             scopes?: string[];
             is_active: boolean;
             crypto_proxy_enabled: boolean;
@@ -1569,6 +1581,14 @@ export interface components {
             tx_allowed_chains?: string[];
             token_ttl_seconds?: number | null;
             vault_ids?: string[];
+            /** @description SHA-256 fingerprint of the client certificate (mTLS agents) */
+            client_cert_fingerprint?: string;
+            /** @description OIDC issuer URL (oidc_client_credentials agents) */
+            oidc_issuer?: string;
+            /** @description OIDC client ID (oidc_client_credentials agents) */
+            oidc_client_id?: string;
+            /** @description Ed25519 SSH public key (base64-encoded, auto-generated at creation) */
+            ssh_public_key?: string;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
@@ -1594,11 +1614,13 @@ export interface components {
             expires_at?: string;
             /** Format: date-time */
             last_active_at?: string;
+            /** @description Ed25519 SSH public key (base64-encoded) */
+            ssh_public_key?: string;
         };
         AgentCreatedResponse: {
             agent: components["schemas"]["AgentResponse"];
-            /** @description One-time API key (store securely) */
-            api_key: string;
+            /** @description One-time API key (only present for api_key auth method) */
+            api_key?: string;
         };
         AgentListResponse: {
             agents?: components["schemas"]["AgentResponse"][];

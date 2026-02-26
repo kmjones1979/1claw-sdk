@@ -245,7 +245,7 @@ export interface PolicyListResponse {
 export interface CreateAgentRequest {
     name: string;
     description?: string;
-    auth_method?: string;
+    auth_method?: "api_key" | "mtls" | "oidc_client_credentials";
     scopes?: string[];
     expires_at?: string;
     crypto_proxy_enabled?: boolean;
@@ -253,6 +253,14 @@ export interface CreateAgentRequest {
     tx_max_value_eth?: string;
     tx_daily_limit_eth?: string;
     tx_allowed_chains?: string[];
+    token_ttl_seconds?: number | null;
+    vault_ids?: string[];
+    /** SHA-256 fingerprint of the client certificate (required for mTLS auth) */
+    client_cert_fingerprint?: string;
+    /** OIDC issuer URL (required for oidc_client_credentials auth) */
+    oidc_issuer?: string;
+    /** OIDC client ID (required for oidc_client_credentials auth) */
+    oidc_client_id?: string;
 }
 
 export type UpdateAgentRequest = ApiSchemas["UpdateAgentRequest"];
@@ -261,7 +269,7 @@ export interface AgentResponse {
     id: string;
     name: string;
     description: string;
-    auth_method: string;
+    auth_method: "api_key" | "mtls" | "oidc_client_credentials";
     scopes: string[];
     is_active: boolean;
     crypto_proxy_enabled: boolean;
@@ -269,6 +277,16 @@ export interface AgentResponse {
     tx_max_value_eth?: string;
     tx_daily_limit_eth?: string;
     tx_allowed_chains?: string[];
+    token_ttl_seconds?: number | null;
+    vault_ids?: string[];
+    /** SHA-256 fingerprint of the client certificate (mTLS agents) */
+    client_cert_fingerprint?: string;
+    /** OIDC issuer URL (oidc_client_credentials agents) */
+    oidc_issuer?: string;
+    /** OIDC client ID (oidc_client_credentials agents) */
+    oidc_client_id?: string;
+    /** Ed25519 SSH public key (base64-encoded, auto-generated at creation) */
+    ssh_public_key?: string;
     created_at: string;
     expires_at?: string;
     last_active_at?: string;
@@ -276,7 +294,8 @@ export interface AgentResponse {
 
 export interface AgentCreatedResponse {
     agent: AgentResponse;
-    api_key: string;
+    /** Only present for api_key auth method */
+    api_key?: string;
 }
 
 export interface AgentListResponse {
@@ -285,6 +304,22 @@ export interface AgentListResponse {
 
 export interface AgentKeyRotatedResponse {
     api_key: string;
+}
+
+export interface AgentSelfResponse {
+    id: string;
+    name: string;
+    description: string;
+    org_id: string;
+    scopes: string[];
+    is_active: boolean;
+    crypto_proxy_enabled: boolean;
+    created_by?: string;
+    created_at: string;
+    expires_at?: string;
+    last_active_at?: string;
+    /** Ed25519 SSH public key (base64-encoded) */
+    ssh_public_key?: string;
 }
 
 // ---------------------------------------------------------------------------

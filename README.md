@@ -128,12 +128,29 @@ Agents can be granted the ability to sign and broadcast on-chain transactions th
 Toggle `crypto_proxy_enabled` when creating or updating an agent:
 
 ```typescript
-// Register an agent with crypto proxy access
+// Register an API key agent with crypto proxy access (default auth_method)
 const { data } = await client.agents.create({
     name: "defi-bot",
-    auth_method: "api_key",
+    auth_method: "api_key", // "api_key" | "mtls" | "oidc_client_credentials"
     scopes: ["vault:read", "tx:sign"],
     crypto_proxy_enabled: true,
+});
+// data.api_key is only returned for auth_method: "api_key"
+// All agents automatically receive an Ed25519 SSH keypair (data.agent.ssh_public_key)
+
+// Register an mTLS agent (no API key returned)
+const { data: mtlsAgent } = await client.agents.create({
+    name: "mtls-bot",
+    auth_method: "mtls",
+    client_cert_fingerprint: "sha256-fingerprint-hex",
+});
+
+// Register an OIDC agent (no API key returned)
+const { data: oidcAgent } = await client.agents.create({
+    name: "oidc-bot",
+    auth_method: "oidc_client_credentials",
+    oidc_issuer: "https://accounts.google.com",
+    oidc_client_id: "your-client-id",
 });
 
 // Or enable it later

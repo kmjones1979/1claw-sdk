@@ -1,6 +1,6 @@
 {
     "name": "@1claw/sdk",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "TypeScript SDK for 1Claw Vault — secret management for AI agents",
     "type": "module",
     "main": "dist/index.js",
@@ -20,7 +20,7 @@
         "README.md"
     ],
     "scripts": {
-        "generate": "openapi-typescript ../../openapi.yaml -o src/generated/api-types.ts",
+        "generate": "openapi-typescript ../openapi-spec/openapi.yaml -o src/generated/api-types.ts",
         "build": "tsc",
         "clean": "rm -rf dist",
         "test": "vitest",
