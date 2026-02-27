@@ -88,16 +88,19 @@ export class AgentsResource {
      * The agent must have `crypto_proxy_enabled: true` and a valid
      * signing key stored in an accessible vault.
      *
-     * Returns the signed transaction hex and keccak tx hash.
+     * Automatically generates an Idempotency-Key header for replay
+     * protection. Pass `idempotencyKey` to override with your own.
      */
     async submitTransaction(
         agentId: string,
         tx: SubmitTransactionRequest,
+        options?: { idempotencyKey?: string },
     ): Promise<OneclawResponse<TransactionResponse>> {
+        const key = options?.idempotencyKey ?? crypto.randomUUID();
         return this.http.request<TransactionResponse>(
             "POST",
             `/v1/agents/${agentId}/transactions`,
-            { body: tx },
+            { body: tx, headers: { "Idempotency-Key": key } },
         );
     }
 

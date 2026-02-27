@@ -182,10 +182,13 @@ console.log(txRes.data?.signed_tx); // signed raw transaction hex
 
 The backend fetches the signing key from the vault, signs the EIP-155 transaction, and returns the signed transaction hex. The signing key is decrypted in-memory, used, and immediately zeroized — it never leaves the server.
 
+The SDK automatically generates an `Idempotency-Key` header (UUID v4) on each `submitTransaction` call, providing replay protection. Duplicate requests within 24 hours return the cached response instead of re-signing.
+
 Key properties:
 
 - **Disabled by default** — a human must explicitly enable per-agent
 - **Signing keys never leave the HSM** — same envelope encryption as secrets
+- **Idempotent by default** — each submission includes an auto-generated `Idempotency-Key` header
 - **Every transaction is audit-logged** with full calldata
 - **Revocable instantly** — set `crypto_proxy_enabled: false` to cut off access
 

@@ -600,7 +600,12 @@ export interface paths {
         /** List agent transactions */
         get: operations["listTransactions"];
         put?: never;
-        /** Submit a transaction for signing */
+        /**
+         * Submit a transaction for signing
+         * @description Replay protection: send an optional **Idempotency-Key** header (e.g. UUID or opaque string).
+         *     Duplicate requests with the same key within 24 hours return the cached transaction response
+         *     (no second sign/broadcast). Omit the header for non-idempotent submissions.
+         */
         post: operations["submitTransaction"];
         delete?: never;
         options?: never;
@@ -1589,6 +1594,8 @@ export interface components {
             oidc_client_id?: string;
             /** @description Ed25519 SSH public key (base64-encoded, auto-generated at creation) */
             ssh_public_key?: string;
+            /** @description P-256 ECDH public key (base64 SEC1 uncompressed point, auto-generated at creation) */
+            ecdh_public_key?: string;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
@@ -1616,6 +1623,8 @@ export interface components {
             last_active_at?: string;
             /** @description Ed25519 SSH public key (base64-encoded) */
             ssh_public_key?: string;
+            /** @description P-256 ECDH public key (base64 SEC1 uncompressed point) */
+            ecdh_public_key?: string;
         };
         AgentCreatedResponse: {
             agent: components["schemas"]["AgentResponse"];
@@ -1668,7 +1677,8 @@ export interface components {
             value_wei?: string;
             /** @enum {string} */
             status?: "pending" | "signed" | "broadcast" | "failed" | "simulation_failed";
-            signed_tx?: string;
+            /** @description Raw signed transaction hex. Omitted (null) by default to reduce exfiltration risk. Pass `include_signed_tx=true` query param on GET endpoints to include it. Always returned on the initial POST submission response. */
+            signed_tx?: string | null;
             tx_hash?: string;
             error_message?: string;
             /** Format: date-time */
@@ -2093,6 +2103,8 @@ export interface components {
         SecretPath: string;
         AgentId: string;
         PolicyId: string;
+        /** @description Set to `true` to include the raw signed transaction hex in the response. Omitted by default to reduce key exfiltration risk. */
+        IncludeSignedTx: boolean;
     };
     requestBodies: never;
     headers: never;
@@ -3174,7 +3186,10 @@ export interface operations {
     };
     listTransactions: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Set to `true` to include the raw signed transaction hex in the response. Omitted by default to reduce key exfiltration risk. */
+                include_signed_tx?: components["parameters"]["IncludeSignedTx"];
+            };
             header?: never;
             path: {
                 agent_id: components["parameters"]["AgentId"];
@@ -3197,7 +3212,10 @@ export interface operations {
     submitTransaction: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Optional key for replay protection; duplicate requests return cached response. */
+                "Idempotency-Key"?: string;
+            };
             path: {
                 agent_id: components["parameters"]["AgentId"];
             };
@@ -3209,6 +3227,15 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Transaction previously created with same Idempotency-Key (replay-safe response) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionResponse"];
+                };
+            };
             /** @description Transaction signed (and optionally broadcast) */
             201: {
                 headers: {
@@ -3219,6 +3246,15 @@ export interface operations {
                 };
             };
             403: components["responses"]["Forbidden"];
+            /** @description Idempotency-Key in use by another in-flight request; retry later. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
             /** @description Simulation reverted (when simulate_first is true) */
             422: {
                 headers: {
@@ -3232,7 +3268,10 @@ export interface operations {
     };
     getTransaction: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Set to `true` to include the raw signed transaction hex in the response. Omitted by default to reduce key exfiltration risk. */
+                include_signed_tx?: components["parameters"]["IncludeSignedTx"];
+            };
             header?: never;
             path: {
                 agent_id: components["parameters"]["AgentId"];
