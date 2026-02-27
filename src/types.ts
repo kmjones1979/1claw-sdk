@@ -95,7 +95,7 @@ export interface AgentSelfResponse {
     org_id: string;
     scopes: string[];
     is_active: boolean;
-    crypto_proxy_enabled: boolean;
+    intents_api_enabled: boolean;
     created_by?: string;
     created_at: string;
     expires_at?: string;
@@ -239,7 +239,7 @@ export interface PolicyListResponse {
 // ---------------------------------------------------------------------------
 
 /**
- * Hand-written: generated version marks `crypto_proxy_enabled` as required
+ * Hand-written: generated version marks `intents_api_enabled` as required
  * (with default false), but SDK callers expect it to be optional.
  */
 export interface CreateAgentRequest {
@@ -248,7 +248,7 @@ export interface CreateAgentRequest {
     auth_method?: "api_key" | "mtls" | "oidc_client_credentials";
     scopes?: string[];
     expires_at?: string;
-    crypto_proxy_enabled?: boolean;
+    intents_api_enabled?: boolean;
     tx_to_allowlist?: string[];
     tx_max_value_eth?: string;
     tx_daily_limit_eth?: string;
@@ -272,7 +272,7 @@ export interface AgentResponse {
     auth_method: "api_key" | "mtls" | "oidc_client_credentials";
     scopes: string[];
     is_active: boolean;
-    crypto_proxy_enabled: boolean;
+    intents_api_enabled: boolean;
     tx_to_allowlist?: string[];
     tx_max_value_eth?: string;
     tx_daily_limit_eth?: string;
@@ -315,7 +315,7 @@ export interface AgentSelfResponse {
     org_id: string;
     scopes: string[];
     is_active: boolean;
-    crypto_proxy_enabled: boolean;
+    intents_api_enabled: boolean;
     created_by?: string;
     created_at: string;
     expires_at?: string;
@@ -368,7 +368,7 @@ export interface CreateChainRequest {
 export type UpdateChainRequest = ApiSchemas["UpdateChainRequest"];
 
 // ---------------------------------------------------------------------------
-// Transactions (Crypto Proxy) — request types from generated spec
+// Transactions (Intents API) — request types from generated spec
 // ---------------------------------------------------------------------------
 
 /**

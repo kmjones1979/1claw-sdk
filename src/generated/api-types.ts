@@ -538,6 +538,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/agents/enroll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Self-enroll an agent
+         * @description Public endpoint (no auth required). Creates an agent under the human's org
+         *     and emails the credentials to the specified human email. The API key is NOT
+         *     returned in the response. Anti-spam: IP rate limiting + per-email cooldown.
+         */
+        post: operations["enrollAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/agents": {
         parameters: {
             query?: never;
@@ -1586,6 +1608,26 @@ export interface components {
         PolicyListResponse: {
             policies?: components["schemas"]["PolicyResponse"][];
         };
+        EnrollAgentRequest: {
+            /** @description Display name for the new agent */
+            name: string;
+            /**
+             * Format: email
+             * @description Email of the human who will receive the agent credentials
+             */
+            human_email: string;
+            /** @description Optional agent description */
+            description?: string;
+        };
+        EnrollAgentResponse: {
+            /**
+             * Format: uuid
+             * @description UUID of the created agent (nil UUID when email not found — uniform response)
+             */
+            agent_id?: string;
+            /** @description Status message (always generic to prevent email enumeration) */
+            message?: string;
+        };
         CreateAgentRequest: {
             name: string;
             description?: string;
@@ -1599,7 +1641,7 @@ export interface components {
             /** Format: date-time */
             expires_at?: string;
             /** @default false */
-            crypto_proxy_enabled: boolean;
+            intents_api_enabled: boolean;
             tx_to_allowlist?: string[];
             tx_max_value_eth?: string;
             tx_daily_limit_eth?: string;
@@ -1621,7 +1663,7 @@ export interface components {
             is_active?: boolean;
             /** Format: date-time */
             expires_at?: string;
-            crypto_proxy_enabled?: boolean;
+            intents_api_enabled?: boolean;
             tx_to_allowlist?: string[];
             tx_max_value_eth?: string;
             tx_daily_limit_eth?: string;
@@ -1638,7 +1680,7 @@ export interface components {
             auth_method: "api_key" | "mtls" | "oidc_client_credentials";
             scopes?: string[];
             is_active: boolean;
-            crypto_proxy_enabled: boolean;
+            intents_api_enabled: boolean;
             tx_to_allowlist?: string[];
             tx_max_value_eth?: string;
             tx_daily_limit_eth?: string;
@@ -1671,7 +1713,7 @@ export interface components {
             org_id?: string;
             scopes?: string[];
             is_active?: boolean;
-            crypto_proxy_enabled?: boolean;
+            intents_api_enabled?: boolean;
             /** Format: uuid */
             created_by?: string;
             /** Format: date-time */
@@ -1965,7 +2007,7 @@ export interface components {
                 agents?: components["schemas"]["UsageMeter"];
                 vaults?: components["schemas"]["UsageMeter"];
                 team_members?: components["schemas"]["UsageMeter"];
-                proxy_transactions?: components["schemas"]["UsageMeter"];
+                intent_transactions?: components["schemas"]["UsageMeter"];
                 shares?: components["schemas"]["UsageMeter"];
             };
         };
@@ -3157,6 +3199,37 @@ export interface operations {
                 content?: never;
             };
             404: components["responses"]["NotFound"];
+        };
+    };
+    enrollAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EnrollAgentRequest"];
+            };
+        };
+        responses: {
+            /** @description Enrollment processed (uniform response to prevent email enumeration) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnrollAgentResponse"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     listAgents: {

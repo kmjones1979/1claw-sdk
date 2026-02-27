@@ -105,7 +105,7 @@ export type {
     ChainListResponse,
     CreateChainRequest,
     UpdateChainRequest,
-    // Transactions (Crypto Proxy)
+    // Transactions (Intents API)
     SubmitTransactionRequest,
     SimulateTransactionRequest,
     SimulateBundleRequest,

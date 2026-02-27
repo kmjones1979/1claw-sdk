@@ -51,7 +51,7 @@ export class AgentsResource {
         return this.http.request<AgentListResponse>("GET", "/v1/agents");
     }
 
-    /** Update agent name, scopes, active status, expiry, or crypto proxy setting. */
+    /** Update agent name, scopes, active status, expiry, or Intents API setting. */
     async update(
         agentId: string,
         update: UpdateAgentRequest,
@@ -81,11 +81,11 @@ export class AgentsResource {
         );
     }
 
-    // ── Crypto Transaction Proxy ───────────────────────────────────────
+    // ── Intents API ──────────────────────────────────────────────────
 
     /**
-     * Submit a transaction intent to be signed by the crypto proxy.
-     * The agent must have `crypto_proxy_enabled: true` and a valid
+     * Submit a transaction intent to be signed by the Intents API.
+     * The agent must have `intents_api_enabled: true` and a valid
      * signing key stored in an accessible vault.
      *
      * Automatically generates an Idempotency-Key header for replay

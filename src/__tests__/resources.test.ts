@@ -205,12 +205,12 @@ describe("AgentsResource", () => {
         globalThis.fetch = mockFetch(201, { agent: { id: "a-1" }, api_key: "ocv_xxx" });
         const res = await new AgentsResource(makeHttp()).create({
             name: "bot",
-            crypto_proxy_enabled: true,
+            intents_api_enabled: true,
             tx_max_value_eth: "0.5",
         });
         const body = JSON.parse(lastCall().init.body as string);
         expect(body.name).toBe("bot");
-        expect(body.crypto_proxy_enabled).toBe(true);
+        expect(body.intents_api_enabled).toBe(true);
         expect(body.tx_max_value_eth).toBe("0.5");
         expect(res.data?.api_key).toBe("ocv_xxx");
     });

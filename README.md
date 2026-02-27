@@ -121,19 +121,19 @@ The SDK exports a typed error hierarchy for catch-based flows:
 | `ValidationError`       | 400         | Invalid request body                                  |
 | `ServerError`           | 500+        | Server-side failure                                   |
 
-## Crypto Transaction Proxy
+## Intents API
 
-Agents can be granted the ability to sign and broadcast on-chain transactions through a controlled signing proxy. Private keys stay in the HSM — the agent submits intent, the proxy signs and broadcasts.
+Agents can be granted the ability to sign and broadcast on-chain transactions through the Intents API. Private keys stay in the HSM — the agent submits intent, the API signs and broadcasts.
 
-Toggle `crypto_proxy_enabled` when creating or updating an agent:
+Toggle `intents_api_enabled` when creating or updating an agent:
 
 ```typescript
-// Register an API key agent with crypto proxy access (default auth_method)
+// Register an API key agent with Intents API access (default auth_method)
 const { data } = await client.agents.create({
     name: "defi-bot",
     auth_method: "api_key", // "api_key" | "mtls" | "oidc_client_credentials"
     scopes: ["vault:read", "tx:sign"],
-    crypto_proxy_enabled: true,
+    intents_api_enabled: true,
 });
 // data.api_key is only returned for auth_method: "api_key"
 // All agents automatically receive an Ed25519 SSH keypair (data.agent.ssh_public_key)
@@ -155,17 +155,17 @@ const { data: oidcAgent } = await client.agents.create({
 
 // Or enable it later
 await client.agents.update(agentId, {
-    crypto_proxy_enabled: true,
+    intents_api_enabled: true,
 });
 
 // Check an agent's proxy status
 const agent = await client.agents.get(agentId);
-console.log(agent.data?.crypto_proxy_enabled); // true
+console.log(agent.data?.intents_api_enabled); // true
 ```
 
 ### Submitting a transaction
 
-Once `crypto_proxy_enabled` is true and the agent has a signing key stored in an accessible vault, the agent can submit transaction intents:
+Once `intents_api_enabled` is true and the agent has a signing key stored in an accessible vault, the agent can submit transaction intents:
 
 ```typescript
 const txRes = await client.agents.submitTransaction(agentId, {
@@ -190,7 +190,7 @@ Key properties:
 - **Signing keys never leave the HSM** — same envelope encryption as secrets
 - **Idempotent by default** — each submission includes an auto-generated `Idempotency-Key` header
 - **Every transaction is audit-logged** with full calldata
-- **Revocable instantly** — set `crypto_proxy_enabled: false` to cut off access
+- **Revocable instantly** — set `intents_api_enabled: false` to cut off access
 
 ## Customer-Managed Encryption Keys (CMEK)
 
