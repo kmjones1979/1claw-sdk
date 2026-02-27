@@ -141,6 +141,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get current user profile */
+        get: operations["getMe"];
+        put?: never;
+        post?: never;
+        /** Delete current user account */
+        delete: operations["deleteMe"];
+        options?: never;
+        head?: never;
+        /** Update user profile */
+        patch: operations["updateMe"];
+        trace?: never;
+    };
     "/v1/auth/mfa/status": {
         parameters: {
             query?: never;
@@ -1216,6 +1235,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/admin/orgs/{org_id}/billing-tier": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set org billing tier (without Stripe)
+         * @description Manually set an organization's billing tier to free, pro, or business.
+         *     For testing and manual upgrades — does not create a Stripe subscription.
+         *     Setting to "pro" or "business" sets period_end to +1 year.
+         *     Setting to "free" clears subscription data.
+         */
+        put: operations["adminSetBillingTier"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/health": {
         parameters: {
             query?: never;
@@ -1356,6 +1398,23 @@ export interface components {
         };
         DeviceApproveRequest: {
             user_code: string;
+        };
+        UserProfileResponse: {
+            /** Format: uuid */
+            id?: string;
+            email?: string;
+            display_name?: string;
+            auth_method?: string;
+            role?: string;
+            email_verified?: boolean;
+            marketing_emails?: boolean;
+            totp_enabled?: boolean;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        UpdateProfileRequest: {
+            display_name?: string;
+            marketing_emails?: boolean;
         };
         CreateApiKeyRequest: {
             name: string;
@@ -2015,6 +2074,7 @@ export interface components {
                 /** Format: uuid */
                 org_id?: string;
                 org_name?: string;
+                billing_tier?: string;
                 /** Format: date-time */
                 created_at?: string;
                 free_tier_override?: number;
@@ -2032,6 +2092,10 @@ export interface components {
             org_id?: string;
             free_tier_override?: number;
             is_sponsored?: boolean;
+        };
+        SetBillingTierRequest: {
+            /** @enum {string} */
+            tier: "free" | "pro" | "business";
         };
         PaymentRequirement: {
             x402Version?: number;
@@ -2329,6 +2393,77 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    getMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User profile */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfileResponse"];
+                };
+            };
+        };
+    };
+    deleteMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Must be "DELETE MY ACCOUNT" */
+                    confirmation: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Account deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    updateMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description Profile updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfileResponse"];
+                };
             };
             400: components["responses"]["BadRequest"];
         };
@@ -4226,6 +4361,32 @@ export interface operations {
                     "application/json": components["schemas"]["OrgLimitsResponse"];
                 };
             };
+        };
+    };
+    adminSetBillingTier: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetBillingTierRequest"];
+            };
+        };
+        responses: {
+            /** @description Billing tier updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            403: components["responses"]["Forbidden"];
         };
     };
     healthCheck: {
