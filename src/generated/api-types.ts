@@ -1289,10 +1289,10 @@ export interface paths {
         get?: never;
         /**
          * Set org billing tier (without Stripe)
-         * @description Manually set an organization's billing tier to free, pro, or business.
-         *     For testing and manual upgrades — does not create a Stripe subscription.
-         *     Setting to "pro" or "business" sets period_end to +1 year.
-         *     Setting to "free" clears subscription data.
+         * @description Manually set an organization's billing tier to free, pro, business, or enterprise.
+         *     For testing, manual upgrades, and trial grants — does not create a Stripe subscription.
+         *     Setting to "pro", "business", or "enterprise" sets period_end to now + duration_days (default 365).
+         *     Setting to "free" clears subscription data. Use duration_days: 90 for a 3-month trial.
          */
         put: operations["adminSetBillingTier"];
         post?: never;
@@ -2159,7 +2159,9 @@ export interface components {
         };
         SetBillingTierRequest: {
             /** @enum {string} */
-            tier: "free" | "pro" | "business";
+            tier: "free" | "pro" | "business" | "enterprise";
+            /** @description How many days the tier lasts (default 365). Use 90 for a 3-month trial. */
+            duration_days?: number;
         };
         PaymentRequirement: {
             x402Version?: number;
