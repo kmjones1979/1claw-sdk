@@ -69,7 +69,11 @@ export class OneclawClient {
         this.http = new HttpClient(config);
 
         if (config.apiKey && !config.token && !config.agentId) {
-            this.autoAuthenticateUserKey(config);
+            // ocv_ keys are agent keys — HttpClient handles token exchange.
+            // 1ck_ keys are user keys — need a one-time token exchange here.
+            if (!config.apiKey.startsWith("ocv_")) {
+                this.autoAuthenticateUserKey(config);
+            }
         }
 
         this.vault = new VaultResource(this.http);

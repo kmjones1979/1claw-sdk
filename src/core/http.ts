@@ -16,8 +16,9 @@ export class HttpClient {
     private tokenExpiresAt = 0;
     private signer?: X402Signer;
     private maxAutoPayUsd: number;
-    private agentCredentials?: { agentId: string; apiKey: string };
+    private agentCredentials?: { agentId?: string; apiKey: string };
     private refreshPromise?: Promise<void>;
+    private _resolvedAgentId?: string;
 
     private static readonly REFRESH_BUFFER_MS = 60_000;
 
@@ -27,12 +28,18 @@ export class HttpClient {
         this.signer = config.x402Signer;
         this.maxAutoPayUsd = config.maxAutoPayUsd ?? 0;
 
-        if (config.agentId && config.apiKey) {
+        const isAgentKey = config.apiKey?.startsWith("ocv_") || !!config.agentId;
+        if (config.apiKey && isAgentKey) {
             this.agentCredentials = {
                 agentId: config.agentId,
                 apiKey: config.apiKey,
             };
         }
+    }
+
+    /** Agent ID resolved from the token exchange (for key-only auth). */
+    get resolvedAgentId(): string | undefined {
+        return this._resolvedAgentId ?? this.agentCredentials?.agentId;
     }
 
     /** Replace the current Bearer token (called by auth methods). */
@@ -76,13 +83,17 @@ export class HttpClient {
         }
 
         this.refreshPromise = (async () => {
+            const body: Record<string, string> = {
+                api_key: this.agentCredentials!.apiKey,
+            };
+            if (this.agentCredentials!.agentId) {
+                body.agent_id = this.agentCredentials!.agentId;
+            }
+
             const res = await fetch(`${this.baseUrl}/v1/auth/agent-token`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    agent_id: this.agentCredentials!.agentId,
-                    api_key: this.agentCredentials!.apiKey,
-                }),
+                body: JSON.stringify(body),
             });
 
             if (!res.ok) {
@@ -94,9 +105,18 @@ export class HttpClient {
             const data = (await res.json()) as {
                 access_token: string;
                 expires_in: number;
+                agent_id?: string;
+                vault_ids?: string[];
             };
             this.token = data.access_token;
             this.tokenExpiresAt = Date.now() + data.expires_in * 1000;
+
+            if (data.agent_id) {
+                this._resolvedAgentId = data.agent_id;
+                if (this.agentCredentials && !this.agentCredentials.agentId) {
+                    this.agentCredentials.agentId = data.agent_id;
+                }
+            }
         })().finally(() => {
             this.refreshPromise = undefined;
         });
