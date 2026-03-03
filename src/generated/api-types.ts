@@ -3101,6 +3101,7 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            402: components["responses"]["PaymentRequired"];
         };
     };
     deleteSecret: {
@@ -3501,6 +3502,7 @@ export interface operations {
                     "application/json": components["schemas"]["TransactionResponse"];
                 };
             };
+            402: components["responses"]["PaymentRequired"];
             403: components["responses"]["Forbidden"];
             /** @description Idempotency-Key in use by another in-flight request; retry later. */
             409: {
@@ -3574,6 +3576,7 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            402: components["responses"]["PaymentRequired"];
             403: components["responses"]["Forbidden"];
         };
     };
@@ -3602,6 +3605,7 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            402: components["responses"]["PaymentRequired"];
         };
     };
     listChains: {
@@ -3762,6 +3766,7 @@ export interface operations {
                     "application/json": components["schemas"]["ShareResponse"];
                 };
             };
+            402: components["responses"]["PaymentRequired"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -4220,6 +4225,7 @@ export interface operations {
                     "application/json": components["schemas"]["AuditEventsResponse"];
                 };
             };
+            402: components["responses"]["PaymentRequired"];
         };
     };
     listIpRules: {
