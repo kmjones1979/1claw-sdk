@@ -265,16 +265,23 @@ export class HttpClient {
         const accept = requirement.accepts?.[0];
         if (!accept || !this.signer) return originalRes;
 
-        const price = parseFloat(accept.price);
-        if (this.maxAutoPayUsd > 0 && price > this.maxAutoPayUsd) {
+        // Prefer maxAmountRequired (atomic); fall back to price (USD) for older servers
+        const priceUsd =
+            accept.price != null
+                ? parseFloat(accept.price)
+                : parseFloat(accept.maxAmountRequired) / 1_000_000; // USDC 6 decimals -> USD
+        if (Number.isNaN(priceUsd)) {
+            return originalRes;
+        }
+        if (this.maxAutoPayUsd > 0 && priceUsd > this.maxAutoPayUsd) {
             throw new PaymentRequiredError(
-                `Payment of $${price} exceeds auto-pay limit of $${this.maxAutoPayUsd}`,
+                `Payment of $${priceUsd.toFixed(4)} exceeds auto-pay limit of $${this.maxAutoPayUsd}`,
                 requirement,
             );
         }
         if (this.maxAutoPayUsd === 0) {
             throw new PaymentRequiredError(
-                `Payment of $${price} required. Enable auto-pay via maxAutoPayUsd config.`,
+                `Payment of $${priceUsd.toFixed(4)} required. Enable auto-pay via maxAutoPayUsd config.`,
                 requirement,
             );
         }

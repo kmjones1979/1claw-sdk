@@ -567,15 +567,25 @@ export interface AuditEventsResponse {
 }
 
 // ---------------------------------------------------------------------------
-// x402 Payment Protocol — hand-written (SDK-specific signer interface)
+// x402 Payment Protocol — hand-written (aligns with docs.g402.ai / x402scan)
 // ---------------------------------------------------------------------------
 
 export interface PaymentAccept {
     scheme: string;
     network: string;
     payTo: string;
-    price: string;
-    requiredDeadlineSeconds: number;
+    /** Payment amount in atomic units (e.g. USDC 6 decimals). Use for signing and limit checks. */
+    maxAmountRequired: string;
+    /** Full URL of the paid resource. */
+    resource: string;
+    maxTimeoutSeconds: number;
+    asset: string;
+    description: string;
+    mimeType: string;
+    /** @deprecated Prefer maxAmountRequired (atomic). USD string for backward compat if server sends it. */
+    price?: string;
+    /** @deprecated Prefer maxTimeoutSeconds. */
+    requiredDeadlineSeconds?: number;
 }
 
 export interface PaymentRequirement {
@@ -602,12 +612,13 @@ export interface PaymentReceipt {
 /**
  * Interface for wallet signers that can produce x402 payment signatures.
  * Implement this with your preferred wallet library (ethers, viem, etc.).
+ * Use accept.maxAmountRequired (atomic units) and accept.asset for the payment.
  */
 export interface X402Signer {
     /** The wallet address that will be debited. */
     getAddress(): Promise<string>;
     /** Sign an EIP-712 typed-data payload and return the signature bytes. */
-    signPayment(requirement: PaymentAccept): Promise<string>;
+    signPayment(accept: PaymentAccept): Promise<string>;
 }
 
 // ---------------------------------------------------------------------------

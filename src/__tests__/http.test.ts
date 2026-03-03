@@ -148,8 +148,13 @@ describe("HttpClient", () => {
                     scheme: "exact",
                     network: "eip155:8453",
                     payTo: "0xabc",
+                    maxAmountRequired: "1000",
+                    resource: "https://api.test/v1/vaults/v1/secrets/key",
+                    maxTimeoutSeconds: 60,
+                    asset: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                    description: "Pay per query",
+                    mimeType: "application/json",
                     price: "0.001",
-                    requiredDeadlineSeconds: 60,
                 },
             ],
             description: "Pay per query",
@@ -222,7 +227,13 @@ describe("HttpClient", () => {
         it("throws when payment exceeds maxAutoPayUsd", async () => {
             const expensiveRequirement = {
                 ...paymentRequirement,
-                accepts: [{ ...paymentRequirement.accepts[0], price: "100.0" }],
+                accepts: [
+                    {
+                        ...paymentRequirement.accepts[0],
+                        price: "100.0",
+                        maxAmountRequired: "100000000",
+                    },
+                ],
             };
 
             globalThis.fetch = vi.fn().mockResolvedValue({
