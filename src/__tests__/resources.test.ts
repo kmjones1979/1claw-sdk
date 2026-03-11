@@ -273,6 +273,26 @@ describe("AgentsResource", () => {
         expect(lastCall().url).toBe(`${BASE}/v1/agents/a-1/transactions`);
     });
 
+    it("listTransactions with includeSignedTx appends query param", async () => {
+        globalThis.fetch = mockFetch(200, { transactions: [] });
+        await new AgentsResource(makeHttp()).listTransactions("a-1", {
+            includeSignedTx: true,
+        });
+        expect(lastCall().url).toBe(
+            `${BASE}/v1/agents/a-1/transactions?include_signed_tx=true`,
+        );
+    });
+
+    it("getTransaction with includeSignedTx appends query param", async () => {
+        globalThis.fetch = mockFetch(200, { id: "tx-1", status: "signed" });
+        await new AgentsResource(makeHttp()).getTransaction("a-1", "tx-1", {
+            includeSignedTx: true,
+        });
+        expect(lastCall().url).toBe(
+            `${BASE}/v1/agents/a-1/transactions/tx-1?include_signed_tx=true`,
+        );
+    });
+
     it("simulateTransaction sends POST to /transactions/simulate", async () => {
         globalThis.fetch = mockFetch(200, { simulation_id: "sim-1", status: "success" });
         await new AgentsResource(makeHttp()).simulateTransaction("a-1", {

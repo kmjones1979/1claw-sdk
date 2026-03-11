@@ -142,24 +142,40 @@ export class AgentsResource {
         );
     }
 
-    /** Fetch a single transaction by ID. */
+    /**
+     * Fetch a single transaction by ID.
+     * By default the API omits `signed_tx`; pass `includeSignedTx: true` to include it.
+     */
     async getTransaction(
         agentId: string,
         txId: string,
+        options?: { includeSignedTx?: boolean },
     ): Promise<OneclawResponse<TransactionResponse>> {
+        const qs =
+            options?.includeSignedTx === true
+                ? "?include_signed_tx=true"
+                : "";
         return this.http.request<TransactionResponse>(
             "GET",
-            `/v1/agents/${agentId}/transactions/${txId}`,
+            `/v1/agents/${agentId}/transactions/${txId}${qs}`,
         );
     }
 
-    /** List recent transactions for an agent. */
+    /**
+     * List recent transactions for an agent.
+     * By default the API omits `signed_tx`; pass `includeSignedTx: true` to include it.
+     */
     async listTransactions(
         agentId: string,
+        options?: { includeSignedTx?: boolean },
     ): Promise<OneclawResponse<TransactionListResponse>> {
+        const qs =
+            options?.includeSignedTx === true
+                ? "?include_signed_tx=true"
+                : "";
         return this.http.request<TransactionListResponse>(
             "GET",
-            `/v1/agents/${agentId}/transactions`,
+            `/v1/agents/${agentId}/transactions${qs}`,
         );
     }
 
